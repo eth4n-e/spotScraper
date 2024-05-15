@@ -2,10 +2,13 @@
 require('dotenv').config()
 const express = require('express');
 
+const musicRoutes = require('./routes/music');
 // create express app
 const app = express();
 
 // middleware setup
+    // parse data sent in request into json
+app.use(express.json());
 app.use((req, res, next) => {
     // log path and request method
     console.log(req.path, req.method);
@@ -13,10 +16,8 @@ app.use((req, res, next) => {
     next();
 })
 
-// routes
-app.get('/', (req, res) => {
-    res.json({mssg: 'Welcome to the app'});
-})
+// use routes defined in music.js
+app.use(musicRoutes);
 
 // listen for requests
 app.listen(process.env.PORT, () => {
