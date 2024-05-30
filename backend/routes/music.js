@@ -1,8 +1,9 @@
 const express = require('express');
 // import Music Model
-const Music = require('../models/musicModel');
+const Track = require('../models/trackModel');
 
-const {getTracks, 
+const {getlogin,
+    getTracks, 
     getTrack,
     createTrack,
 } = require('../controllers/musicController')
@@ -10,8 +11,9 @@ const {getTracks,
 // use expresses router to handle all routes
 const router = express.Router();
 
-// get all tracks
-router.get('/', getTracks);
+// login
+    // react will handle getting login page and redirects 
+router.post('/', login);
 
 // get a single track
 router.get('/:id', getTrack);

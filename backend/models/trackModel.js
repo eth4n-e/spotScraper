@@ -10,7 +10,7 @@ const Schema = mongoose.Schema
     // how should music data / object look
     // each music document must follow this structure
         // Note: document in mongoDB is like a json object with key:value pairs describing the data
-const musicSchema = new Schema({
+const trackSchema = new Schema({
     title: { // property
         type: String,
         required: true // if field is missing, will not allow us to save document
@@ -26,4 +26,4 @@ const musicSchema = new Schema({
 // create a model
 // model allows us to interact with collection (Musics, created when model is also created)
     // in terms of sql: model is like queries to interact with data
-module.exports = mongoose.model('Music', musicSchema)
+module.exports = mongoose.model('Track', trackSchema)
