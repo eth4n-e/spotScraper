@@ -20,7 +20,23 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true
+    },
+    authToken: {
+        type: String,
+        required: true,
+    },
+    refreshToken: {
+        type: String,
+        required: true,
+    },
+    tokenExpiration: {
+        type: Number,
+        required: true,
     }
+    // potential add ons:
+        // access token
+        // refresh token
+        // tokenExpirationTime
 })
 
 module.exports = mongoose.model('User', userSchema);

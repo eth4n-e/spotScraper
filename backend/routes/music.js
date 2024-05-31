@@ -2,7 +2,8 @@ const express = require('express');
 // import Music Model
 const Track = require('../models/trackModel');
 
-const {getlogin,
+const { register,
+    login,
     getTracks, 
     getTrack,
     createTrack,

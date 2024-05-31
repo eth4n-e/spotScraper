@@ -3,14 +3,17 @@ const Track = require('../models/trackModel');
 const User = require('../models/userModel');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 // might need axios, dotenv, bcrypt
+const client_id = process.env.CLIENT_ID;
+const redirectUrl = 'http://localhost:3000';
+
+// maybe define a user
 
 /* TO DO: register route
     - register a user in the db
-        - create a spotify token
         - store username, email, password in db
             - hash password for security
-        - save session
 */
 const register = async(req, res) => {
     const {email, username, password} = req.body;
@@ -24,10 +27,16 @@ const register = async(req, res) => {
         // no user
             // add to db, create initial spotify token, 
         if(!user) {
+            const authToken = undefined;
+            const refreshToken = undefined;
+            const tokenExpiration = undefined;
+
             // create new user with hashed password
-                // think: should I add authentication token to userSchema
-                    // look over how to refresh a users token
-            const newUser = await User.create(email, username, hash)
+                // set authentications to undefined
+                // update these upon login
+                    // in other requests, refresh the spotify token
+            const newUser = await User.create(email, username, hash, authToken, refreshToken, tokenExpiration);
+            res.status(200).json({user: newUser});
         } else {
             res.status(400).json({error: 'User already exists'});
         }
@@ -46,23 +55,32 @@ const register = async(req, res) => {
 const login = async(req, res) => {
     // obtain email, username, password from request
     const {email, username, password} = req.body;
+    try {
+          // find user with matchin email
+        const user = await User.findOne({email});
 
-    // find user with matchin email
-    const user = await User.findOne({email});
+        if(!user) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
 
-    if(!user) {
-        return res.status(401).json({ error: 'Invalid email or password' });
+        //user exists
+        // validate password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if(!passwordMatch) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        // user exists & password matches
+            // save session, generate authentication token
+        req.session.user = user;
+        req.session.save();
+        next();
+    } catch(err) {
+        console.log(err);
+        res.status(404).json({ error: err });
     }
-
-    //user exists
-    // validate password
-    const passwordMatch = await bcrypt.compare(password, user.password);
-
-    if(!passwordMatch) {
-        return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    // user exists & password matches
+    
 
 }
 
