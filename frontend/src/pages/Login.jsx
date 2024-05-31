@@ -1,9 +1,9 @@
-const Home = () => {
+const Login = () => {
     return (
-        <div className="home">
+        <div>
             <h2 className="italic font-bold ml-4">Home</h2>
         </div>
     );
 }
 
-export default Home
+export default Login
