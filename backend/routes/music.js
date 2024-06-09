@@ -12,9 +12,11 @@ const { register,
 // use expresses router to handle all routes
 const router = express.Router();
 
+router.post('/register', register);
+
 // login
     // react will handle getting login page and redirects 
-router.post('/', login);
+router.post('/login', login);
 
 // get a single track
 router.get('/:id', getTrack);

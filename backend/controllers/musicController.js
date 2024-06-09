@@ -6,9 +6,7 @@ const bcrypt = require('bcrypt');
 require('dotenv').config();
 // might need axios, dotenv, bcrypt
 const client_id = process.env.CLIENT_ID;
-const redirectUrl = 'http://localhost:3000';
-
-// maybe define a user
+const redirect_uri = 'http://localhost:3000'; // url to redirect back to after authorization
 
 /* TO DO: register route
     - register a user in the db
@@ -20,17 +18,14 @@ const register = async(req, res) => {
 
     try {
         const hash = await bcrypt.hash(password, 10);
-
         // check if user exists by email
-        const user = await User.find({email})
-
+        const user = await User.find({email})s
         // no user
-            // add to db, create initial spotify token, 
+            // add to db 
         if(!user) {
             const authToken = undefined;
             const refreshToken = undefined;
             const tokenExpiration = undefined;
-            const code
 
             // create new user with hashed password
                 // set authentications to undefined
@@ -41,7 +36,6 @@ const register = async(req, res) => {
         } else {
             res.status(400).json({error: 'User already exists'});
         }
-
     } catch(err) {
         res.status(400).json({ error: err });
     }
@@ -52,7 +46,17 @@ const register = async(req, res) => {
     - keep track of session 
 */
 // still needs work
-const login = async(req, res) => {
+
+// 
+const setAccessToken = async (req, res) => {
+
+}
+
+const refreshAccessToken = async (req, res) => {
+
+}
+
+const login = async (req, res) => {
     const state = generateRandomString(16);
     const scope = 'user-read-private user-read-email';
 
