@@ -30,6 +30,7 @@ const register = async(req, res) => {
             const authToken = undefined;
             const refreshToken = undefined;
             const tokenExpiration = undefined;
+            const code
 
             // create new user with hashed password
                 // set authentications to undefined
@@ -46,42 +47,23 @@ const register = async(req, res) => {
     }
 }
 
-
 /* TO DO: login route:
     - search for user in db
     - keep track of session 
 */
 // still needs work
 const login = async(req, res) => {
-    // obtain email, username, password from request
-    const {email, username, password} = req.body;
-    try {
-          // find user with matchin email
-        const user = await User.findOne({email});
+    const state = generateRandomString(16);
+    const scope = 'user-read-private user-read-email';
 
-        if(!user) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        //user exists
-        // validate password
-        const passwordMatch = await bcrypt.compare(password, user.password);
-
-        if(!passwordMatch) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        // user exists & password matches
-            // save session, generate authentication token
-        req.session.user = user;
-        req.session.save();
-        next();
-    } catch(err) {
-        console.log(err);
-        res.status(404).json({ error: err });
-    }
-    
-
+    res.redirect('https://accounts.spotify.com/authorize?' +
+        querystring.stringify({
+            response_type: 'code',
+            client_id: client_id,
+            scope: scope,
+            redirect_uri: redirect_uri,
+            state: state
+    }));
 }
 
 // get all tracks

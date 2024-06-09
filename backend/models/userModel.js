@@ -21,7 +21,7 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    authToken: {
+    accessToken: {
         type: String,
         required: true,
     },
@@ -32,11 +32,11 @@ const userSchema = new Schema({
     tokenExpiration: {
         type: Number,
         required: true,
+    }, 
+    codeVerifier: {
+        type: String,
+        require: true
     }
-    // potential add ons:
-        // access token
-        // refresh token
-        // tokenExpirationTime
 })
 
 module.exports = mongoose.model('User', userSchema);
