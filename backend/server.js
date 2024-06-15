@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 })
 
 // use routes defined in music.js
-app.use(musicRoutes);
+app.use('/api/music', musicRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {

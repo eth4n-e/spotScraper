@@ -1,9 +1,30 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faSpotify} from '@fortawesome/free-brands-svg-icons';
-import { Link } from 'react-router-dom';
+import axios from 'axios';
 
-
+// should pass in a user possibly
+    // response from call to authorization endpoint should be stored
+    // and used to update the current user's information
 const Auth = () => {
+
+    const handleAuth = async () => {
+        try {
+            // to receive from callback:
+                // access_token
+                // token_type
+                // scope
+                // expires_in
+                // refresh_token
+            // maybe make a separate model for tokens
+                // User can have a token document
+            // from response make a post request to update user information
+            const response = await fetch('http://localhost:4000/api/music/login');
+            console.log(response);
+        } catch(err) {
+            console.log(err);
+        }   
+    }
+
     return (
         <form>
             <div className="absolute bottom-0 left-0 bg-beige size-full p-0 mx-auto">
@@ -11,9 +32,7 @@ const Auth = () => {
                     <header className="bg-beige drop-shadow-xl rounded-t-xl">
                         <h1 className='py-6 font-bold text-xl text-brown3'>Authorize Via Spotify</h1>
                     </header>
-                    <Link to="/login">
-                        <FontAwesomeIcon icon={faSpotify} beat size="8x" className='mt-20 text-beige' />
-                    </Link>
+                    <FontAwesomeIcon icon={faSpotify} size="8x" className='mt-20 text-beige' onClick={() => handleAuth()}/>
                 </div>
             </div>
         </form>

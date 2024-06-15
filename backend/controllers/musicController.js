@@ -3,10 +3,11 @@ const Track = require('../models/trackModel');
 const User = require('../models/userModel');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const querystring = require('querystring');
 require('dotenv').config();
 // might need axios, dotenv, bcrypt
 const client_id = process.env.CLIENT_ID;
-const redirect_uri = 'http://localhost:3000'; // url to redirect back to after authorization
+const redirect_uri = 'http://localhost:4000/api/music/callback'; // url to redirect back to after authorization
 
 /* TO DO: register route
     - register a user in the db
@@ -19,7 +20,7 @@ const register = async(req, res) => {
     try {
         const hash = await bcrypt.hash(password, 10);
         // check if user exists by email
-        const user = await User.find({email})s
+        const user = await User.find({email});
         // no user
             // add to db 
         if(!user) {
@@ -56,6 +57,13 @@ const refreshAccessToken = async (req, res) => {
 
 }
 
+// helper method to generate random string
+const generateRandomString = (length) => {
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const values = crypto.getRandomValues(new Uint8Array(length));
+    return values.reduce((acc, x) => acc + possible[x % possible.length], "");
+}
+
 const login = async (req, res) => {
     const state = generateRandomString(16);
     const scope = 'user-read-private user-read-email';
@@ -68,6 +76,32 @@ const login = async (req, res) => {
             redirect_uri: redirect_uri,
             state: state
     }));
+}
+
+const callback = async (req,res) => {
+    var code = req.query.code || null;
+    var state = req.query.state || null;
+  
+    if (state === null) {
+      res.redirect('/#' +
+        querystring.stringify({
+          error: 'state_mismatch'
+        }));
+    } else {
+      var authOptions = {
+        url: 'https://accounts.spotify.com/api/token',
+        form: {
+          code: code,
+          redirect_uri: redirect_uri,
+          grant_type: 'authorization_code'
+        },
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64'))
+        },
+        json: true
+      };
+    }
 }
 
 // get all tracks
@@ -116,6 +150,7 @@ const createTrack = async (req, res) => {
 
 module.exports = {
     login,
+    callback,
     register,
     getTracks,
     getTrack,
