@@ -1,7 +1,7 @@
 import {BrowserRouter, Routes, Route } from 'react-router-dom'
 
 // pages & components
-import Register from './pages/Register';
+import Auth from './pages/Auth';
 import Login from './pages/Login';
 
 function App() {
@@ -11,8 +11,8 @@ function App() {
         <div className="pages">
           <Routes>
             <Route
-              path='/register'
-              element={<Register />}
+              path='/'
+              element={<Auth />}
             />
             <Route
               path='/login'
