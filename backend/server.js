@@ -8,11 +8,15 @@ const musicRoutes = require('./routes/music');
 // create express app
 const app = express();
 
+
+const corsOptions = {
+    origin: 'http://localhost:3000'
+}
 // cross-origin resource sharing
     // ensures safe access to data / resources
     // determines which origins (protocol, hostname, port) can access resources / have permission
     // e.g. define localhost as origin, only localhost can get data / access backend resources
-app.use(cors());
+app.use(cors(corsOptions));
 // middleware setup
     // parse data sent in request into json
 app.use(express.json());

@@ -18,7 +18,8 @@ const Auth = () => {
             // maybe make a separate model for tokens
                 // User can have a token document
             // from response make a post request to update user information
-            const response = await fetch('http://localhost:4000/api/music/login');
+            // const response = await fetch('/api/music/login');
+            const response = await axios.get('/api/music/login');
             console.log(response);
         } catch(err) {
             console.log(err);
