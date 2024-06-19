@@ -9,14 +9,14 @@ const axios = require('axios');
 // const SpotifyWebApi = require('spotify-web-api-node');
 
 // client credentials / necessary data for spotify requests
-const client_id = process.env.CLIENT_ID;
-const redirect_uri = 'http://localhost:3000/api/music/callback'; // url to redirect back to after authorization
+const clientId = process.env.CLIENT_ID;
+const redirectUri = 'http://localhost:3000/callback'; // url to redirect back to after authorization
 
     // tried using node spotify api
 // const spotifyApi = new SpotifyWebApi({
 //     clientId: process.env.CLIENT_ID,
 //     clientSecret: process.env.CLIENT_SECRET,
-//     redirectUri: 'http://localhost:/3000/api/music/callback'
+//     redirectUri: 'http://localhost:/3000/callback'
 // });
 
 /* TO DO: register route
@@ -75,37 +75,25 @@ const generateRandomString = (length) => {
 }
 
 const login = async (req, res) => {
+    console.log('Received request to login');
+
     const state = generateRandomString(16);
-    const scopes = 'user-read-private user-read-email';
+    const scopes = ['user-read-private', 'user-read-email'];
 
+    // pass the authorization url to the frontend
+    // frontend handles redirect to spotify's authorization page
     try {
-            // getting correct response (the html page for spotify authorization)
-        // const response = await axios.get('https://accounts.spotify.com/authorize', {
-        //     params: {
-        //         response_type: 'code',
-        //         client_id: client_id,
-        //         scope: scope,
-        //         redirect_uri: redirect_uri,
-        //         state: state,
-        //         show_dialog: true,
-        //     }
-        // });
-        // res.send(response.data);
-        res.redirect('https://accounts.spotify.com/authorize?' +
-            querystring.stringify({
-                response_type: 'code',
-                client_id: client_id,
-                scope: scope,
-                redirect_uri: redirect_uri,
-                state: state,
-                show_dialog: true,
-        }));
+        const queryParams = querystring.stringify({
+            response_type: 'code',
+            client_id: clientId,
+            scope: scopes.join(' '),
+            redirect_uri: redirectUri,
+            state: state,
+            show_dialog: true
+        });
 
-            // attempting to redirect using spotify api node
-        // const loginLink = spotifyApi.createAuthorizeURL(scopes, state);
-        // res.redirect(loginLink);
-
-        // console.log(response);
+        const authorize_url = `https://accounts.spotify.com/authorize?${queryParams}`;
+        return res.status(200).json({auth_data: authorize_url});
     } catch(err) {
         console.log(err);
         res.status(500).json({'error': err});
@@ -113,6 +101,7 @@ const login = async (req, res) => {
 }
 
 const callback = async (req,res) => {
+    console.log('in callback');
     var code = req.query.code || null;
     var state = req.query.state || null;
   
