@@ -4,7 +4,7 @@ const Track = require('../models/trackModel');
 
 const { register,
     login,
-    callback,
+    home,
     getTracks, 
     getTrack,
     createTrack,
@@ -19,7 +19,7 @@ router.post('/register', register);
     // react will handle getting login page and redirects 
 router.get('/login', login);
 // router.post('/login', login);
-router.get('/callback', callback);
+router.get('/home', home);
 
 // get a single track
 router.get('/:id', getTrack);

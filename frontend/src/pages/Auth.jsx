@@ -28,7 +28,7 @@ const Auth = () => {
                 console.log(response);
                 const authorize_url = response.data.auth_data;
                 console.log(`Authorization URL received from backend ${authorize_url}`);
-                window.open(authorize_url, '_blank'); 
+                window.location.href = authorize_url; 
             } catch(err) {
                 console.log(err);
             }

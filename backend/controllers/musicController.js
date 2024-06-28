@@ -6,18 +6,11 @@ const bcrypt = require('bcrypt');
 const querystring = require('querystring');
 require('dotenv').config();
 const axios = require('axios');
-// const SpotifyWebApi = require('spotify-web-api-node');
 
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
-const redirectUri = 'http://localhost:3000/callback'; // url to redirect back to after authorization
-
-    // tried using node spotify api
-// const spotifyApi = new SpotifyWebApi({
-//     clientId: process.env.CLIENT_ID,
-//     clientSecret: process.env.CLIENT_SECRET,
-//     redirectUri: 'http://localhost:/3000/callback'
-// });
+const clientSecret = process.env.CLIENT_SECRET;
+const redirectUri = 'http://localhost:3000/home'; // url to redirect back to after authorization
 
 /* TO DO: register route
     - register a user in the db
@@ -100,10 +93,15 @@ const login = async (req, res) => {
     }
 }
 
-const callback = async (req,res) => {
+// depending on user response, whether accept / deny authorization
+    // update user information / perform necessary redirects
+        // e.g. if user accepts, from react component:
+            // post request to create token
+            // make a get request to load the home page
+const home = async (req,res) => {
     console.log('in callback');
-    var code = req.query.code || null;
-    var state = req.query.state || null;
+    const code = req.query.code || null;
+    const state = req.query.state || null;
   
     if (state === null) {
       res.redirect('/#' +
@@ -111,26 +109,38 @@ const callback = async (req,res) => {
           error: 'state_mismatch'
         }));
     } else {
-      var authOptions = {
-        url: 'https://accounts.spotify.com/api/token',
-        form: {
-          code: code,
-          redirect_uri: redirect_uri,
-          grant_type: 'authorization_code'
-        },
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64'))
-        },
-        json: true
-      };
-    }
+      try {
+        const authOptions = {
+            url: 'https://accounts.spotify.com/api/token',
+            form: {
+              code: code,
+              redirect_uri: redirectUri,
+              grant_type: 'authorization_code'
+            },
+            headers: {
+              'content-type': 'application/x-www-form-urlencoded',
+              'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
+            },
+            json: true
+          };
+        
+          const tokenResponse = await axios.post(authOptions);
 
-    // depending on user response, whether accept / deny authorization
-    // update user information / perform necessary redirects
-        // e.g. if user accepts, from react component:
-            // post request to create token
-            // make a get request to load the home page
+          const accessToken = tokenResponse.data.access_token;
+          const refreshToken = tokenResponse.data.refresh_token;
+          const expiration = tokenResponse.data.expires_in;
+
+          res.json({
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            tokenExpiration: expiration
+          });
+          // to-do: create a mongoDB user upon successful tokenResponse
+      } catch(err) {
+          console.error('Error retrieving access token from Spotify:', err);
+          res.status(err.response.status || 500).json({ error: 'Failed to retrieve access token from Spotify' });
+      }
+    }
 }
 
 // get all tracks
@@ -179,7 +189,7 @@ const createTrack = async (req, res) => {
 
 module.exports = {
     login,
-    callback,
+    home,
     register,
     getTracks,
     getTrack,
