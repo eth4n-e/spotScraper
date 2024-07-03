@@ -4,11 +4,12 @@ const Track = require('../models/trackModel');
 
 const { register,
     login,
-    home,
+    getHome,
+    exchangeCodeForToken,
     getTracks, 
     getTrack,
     createTrack,
-} = require('../controllers/musicController')
+} = require('../controllers/musicController');
 
 // use expresses router to handle all routes
 const router = express.Router();
@@ -19,7 +20,8 @@ router.post('/register', register);
     // react will handle getting login page and redirects 
 router.get('/login', login);
 // router.post('/login', login);
-router.get('/home', home);
+//router.get('/home', home);
+router.get('/home', getHome, exchangeCodeForToken);
 
 // get a single track
 router.get('/:id', getTrack);

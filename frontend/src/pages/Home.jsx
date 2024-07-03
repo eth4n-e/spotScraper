@@ -21,21 +21,18 @@ const Home = () => {
         const fetchUserData = async () => {
             // fetch parameters from url to pass to backend route
             const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
+            const spotCode = urlParams.get('code');
+            const spotState = urlParams.get('state');
 
             try {
                 const response = await axios.get('/api/music/home', {
-                    headers: {
-                        'Access-Control-Allow-Origin': 'http://localhost:3000/',
-                    },
                     params: {
-                        code: code,
-                        state: state,
-                    },
+                        code: spotCode,
+                        state: spotState,
+                    }
                 });
 
-                console.log(response);
+                console.log(response.data.access_token);
             } catch (err) {
                 console.log(err);
             }

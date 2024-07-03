@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const querystring = require('querystring');
 require('dotenv').config();
 const axios = require('axios');
+const { URLSearchParams } = require('url');
 
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
@@ -93,16 +94,45 @@ const login = async (req, res) => {
     }
 }
 
-// depending on user response, whether accept / deny authorization
-    // update user information / perform necessary redirects
-        // e.g. if user accepts, from react component:
-            // post request to create token
-            // make a get request to load the home page
-const home = async (req,res) => {
+const exchangeCodeForToken = async (code) => {
+    try {
+        const authOptions = {
+            form: {
+                code: code,
+                redirect_uri: redirectUri,
+                grant_type: 'authorization_code'
+            },
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
+            },
+            json: true
+        };
+    
+        const tokenResponse = await axios.post(
+            'https://accounts.spotify.com/api/token',
+            authOptions
+        );
+
+        return {
+            accessToken: tokenResponse.data.access_token,
+            refreshToken: tokenResponse.data.refresh_token,
+            tokenExpiration: tokenResponse.data.expires_in
+        }
+        // to-do: create a mongoDB user upon successful tokenResponse
+    } catch(err) {
+        console.error('Error obtaining token:', err);
+        throw new Error('Failed to obtain Spotify access token');
+    }
+}
+
+const getHome = async (req, res) => {
     console.log('in callback');
     const code = req.query.code || null;
     const state = req.query.state || null;
   
+    console.log(code);
+    console.log(state);
     if (state === null) {
       res.redirect('/#' +
         querystring.stringify({
@@ -110,35 +140,13 @@ const home = async (req,res) => {
         }));
     } else {
       try {
-        const authOptions = {
-            url: 'https://accounts.spotify.com/api/token',
-            form: {
-              code: code,
-              redirect_uri: redirectUri,
-              grant_type: 'authorization_code'
-            },
-            headers: {
-              'content-type': 'application/x-www-form-urlencoded',
-              'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
-            },
-            json: true
-          };
-        
-          const tokenResponse = await axios.post(authOptions);
+          const tokenResponse = await exchangeCodeForToken(code);
 
-          const accessToken = tokenResponse.data.access_token;
-          const refreshToken = tokenResponse.data.refresh_token;
-          const expiration = tokenResponse.data.expires_in;
-
-          res.json({
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            tokenExpiration: expiration
-          });
+          return res.status(200).json(tokenResponse);
           // to-do: create a mongoDB user upon successful tokenResponse
       } catch(err) {
-          console.error('Error retrieving access token from Spotify:', err);
-          res.status(err.response.status || 500).json({ error: 'Failed to retrieve access token from Spotify' });
+          console.error('Error in /api/music/home route: ', err);
+          res.status(500).json({ error: 'Failed to retrieve access token from Spotify' });
       }
     }
 }
@@ -189,7 +197,8 @@ const createTrack = async (req, res) => {
 
 module.exports = {
     login,
-    home,
+    getHome,
+    exchangeCodeForToken,
     register,
     getTracks,
     getTrack,
