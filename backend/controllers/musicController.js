@@ -13,6 +13,37 @@ const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'http://localhost:3000/home'; // url to redirect back to after authorization
 
+
+/** HELPER METHODS TO IMPLEMENT SPOTIFY AUTHORIZATION PKCE FLOW */
+
+// method to generate a code verifier (high-entropy cryptographic string)
+const generateRandomString = (length) => {
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const values = crypto.getRandomValues(new Uint8Array(length));
+    return values.reduce((acc, x) => acc + possible[x % possible.length], "");
+}
+
+//temporarily using a global codeVerifier to execute PKCE flow correctly
+    // will eventually store the codeVerifier when instantiating new Users
+const codeVerifier = generateRandomString(64);
+
+// method to hash the code verifier
+// returns a digest based on the SHA256 algorithm
+const sha256 = async (plain) => {
+    const encoder = new TextEncoder()
+    const data = encoder.encode(plain)
+    return crypto.subtle.digest('SHA-256', data)
+}
+
+// method to return base64 representation of digest created by sha256 method
+const base64encode = (input) => {
+    return btoa(String.fromCharCode(...new Uint8Array(input)))
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+}  
+/** */
+
 /* TO DO: register route
     - register a user in the db
         - store username, email, password in db
@@ -46,33 +77,16 @@ const register = async(req, res) => {
     }
 }
 
-/* TO DO: login route:
-    - search for user in db
-    - keep track of session 
-*/
-// still needs work
-
-// 
-const setAccessToken = async (req, res) => {
-
-}
-
-const refreshAccessToken = async (req, res) => {
-
-}
-
-// helper method to generate random string
-const generateRandomString = (length) => {
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const values = crypto.getRandomValues(new Uint8Array(length));
-    return values.reduce((acc, x) => acc + possible[x % possible.length], "");
-}
-
-const login = async (req, res) => {
-    console.log('Received request to login');
-
+const redirectToSpotifyAuth = async (req, res) => {
+    // protection against attacks
     const state = generateRandomString(16);
-    const scopes = ['user-read-private', 'user-read-email'];
+    // spotify functionality we want to access
+    const scopes = 'user-read-private user-read-email';
+
+    // generate code challenge for PKCE code flow
+    // const codeVerifier = generateRandomString(64);
+    const hashedVerifier = sha256(codeVerifier);
+    const codeChallenge = base64encode(hashedVerifier);
 
     // pass the authorization url to the frontend
     // frontend handles redirect to spotify's authorization page
@@ -80,8 +94,10 @@ const login = async (req, res) => {
         const queryParams = querystring.stringify({
             response_type: 'code',
             client_id: clientId,
-            scope: scopes.join(' '),
+            scope: scopes,
             redirect_uri: redirectUri,
+            code_challenge_method: 'S256',
+            code_challenge: codeChallenge,
             state: state,
             show_dialog: true
         });
@@ -96,29 +112,25 @@ const login = async (req, res) => {
 
 const exchangeCodeForToken = async (code) => {
     try {
-        const authOptions = {
-            form: {
-                code: code,
-                redirect_uri: redirectUri,
-                grant_type: 'authorization_code'
-            },
+        const tokenEndpoint = "https://accounts.spotify.com/api/token";
+    
+        const tokenResponse = await fetch(tokenEndpoint, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
             },
-            json: true
-        };
-    
-        const tokenResponse = await axios.post(
-            'https://accounts.spotify.com/api/token',
-            authOptions
-        );
+            body: new URLSearchParams({
+                client_id: clientId,
+                grant_type: 'authorization_code',
+                code,
+                redirect_uri: redirectUri,
+                code_verifier: codeVerifier,
+            }),
+        });
 
-        return {
-            accessToken: tokenResponse.data.access_token,
-            refreshToken: tokenResponse.data.refresh_token,
-            tokenExpiration: tokenResponse.data.expires_in
-        }
+        console.log('exchangeCodeForToken tokenResponse: ', tokenResponse);
+
+        return await tokenResponse.json();
         // to-do: create a mongoDB user upon successful tokenResponse
     } catch(err) {
         console.error('Error obtaining token:', err);
@@ -196,7 +208,7 @@ const createTrack = async (req, res) => {
 }
 
 module.exports = {
-    login,
+    redirectToSpotifyAuth,
     getHome,
     exchangeCodeForToken,
     register,

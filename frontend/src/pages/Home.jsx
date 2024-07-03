@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
@@ -14,7 +15,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
         - use context to manage data / state across several components
 */
 const Home = () => {
-
+    const navigate = useNavigate();
     // fetch data for user
     useEffect( () => {
         // axios call to backend controller to handle callback logic
@@ -23,18 +24,23 @@ const Home = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const spotCode = urlParams.get('code');
             const spotState = urlParams.get('state');
-
-            try {
-                const response = await axios.get('/api/music/home', {
-                    params: {
-                        code: spotCode,
-                        state: spotState,
-                    }
-                });
-
-                console.log(response.data.access_token);
-            } catch (err) {
-                console.log(err);
+         
+            // user denied permissions
+            if(spotCode == null) {
+                navigate('/');
+            } else { // continue with PKCE flow
+                try {
+                    const response = await axios.get('/api/music/home', {
+                        params: {
+                            code: spotCode,
+                            state: spotState,
+                        }
+                    });
+    
+                    console.log(response);
+                } catch (err) {
+                    console.log(err);
+                }
             }
         }
 
