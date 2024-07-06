@@ -23,10 +23,6 @@ const generateRandomString = (length) => {
     return values.reduce((acc, x) => acc + possible[x % possible.length], "");
 }
 
-//temporarily using a global codeVerifier to execute PKCE flow correctly
-    // will eventually store the codeVerifier when instantiating new Users
-const codeVerifier = generateRandomString(64);
-
 // method to hash the code verifier
 // returns a digest based on the SHA256 algorithm
 const sha256 = async (plain) => {
@@ -84,9 +80,18 @@ const redirectToSpotifyAuth = async (req, res) => {
     const scopes = 'user-read-private user-read-email';
 
     // generate code challenge for PKCE code flow
-    // const codeVerifier = generateRandomString(64);
+    const codeVerifier = generateRandomString(64);
+    // saving in localStorage prior to creating a new user
+    // wanted to prevent frequent user creation and deletion
+    // after user agrees to settings then create a user
+        // may need to create a check to see if a user has registered if I want either:
+            // 1) one time agreeance to privileges
+            // or
+            // 2) must agree each time (think I prefer)
+
     const hashedVerifier = sha256(codeVerifier);
     const codeChallenge = base64encode(hashedVerifier);
+
 
     // pass the authorization url to the frontend
     // frontend handles redirect to spotify's authorization page
@@ -110,8 +115,10 @@ const redirectToSpotifyAuth = async (req, res) => {
     }
 }
 
-const exchangeCodeForToken = async (code) => {
+const exchangeCodeForToken = async (code, codeVerifier) => {
     try {
+        
+
         const tokenEndpoint = "https://accounts.spotify.com/api/token";
     
         const tokenResponse = await fetch(tokenEndpoint, {
@@ -138,13 +145,16 @@ const exchangeCodeForToken = async (code) => {
     }
 }
 
-const getHome = async (req, res) => {
+const postHome = async (req, res) => {
     console.log('in callback');
-    const code = req.query.code || null;
-    const state = req.query.state || null;
+    console.log('Request Object: ', req);
+
+    const codeVerifier = req.body.code_verifier;
+    const code = req.body.code || null;
+    const state = req.body.state || null;
   
-    console.log(code);
-    console.log(state);
+    console.log("Code: ", code);
+    console.log("State: ", state);
     if (state === null) {
       res.redirect('/#' +
         querystring.stringify({
@@ -152,7 +162,7 @@ const getHome = async (req, res) => {
         }));
     } else {
       try {
-          const tokenResponse = await exchangeCodeForToken(code);
+          const tokenResponse = await exchangeCodeForToken(code, codeVerifier);
 
           return res.status(200).json(tokenResponse);
           // to-do: create a mongoDB user upon successful tokenResponse
@@ -208,8 +218,9 @@ const createTrack = async (req, res) => {
 }
 
 module.exports = {
+    generateRandomString,
     redirectToSpotifyAuth,
-    getHome,
+    postHome,
     exchangeCodeForToken,
     register,
     getTracks,

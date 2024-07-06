@@ -4,7 +4,7 @@ const Track = require('../models/trackModel');
 
 const { register,
     redirectToSpotifyAuth,
-    getHome,
+    postHome,
     exchangeCodeForToken,
     getTracks, 
     getTrack,
@@ -18,10 +18,10 @@ router.post('/register', register);
 
 // login
     // react will handle getting login page and redirects 
-router.get('/login', redirectToSpotifyAuth);
+router.post('/login', redirectToSpotifyAuth);
 // router.post('/login', login);
 //router.get('/home', home);
-router.get('/home', getHome, exchangeCodeForToken);
+router.post('/home', postHome, exchangeCodeForToken);
 
 // get a single track
 router.get('/:id', getTrack);

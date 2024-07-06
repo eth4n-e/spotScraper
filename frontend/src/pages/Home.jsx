@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -16,10 +16,13 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 */
 const Home = () => {
     const navigate = useNavigate();
+    const [ loadEffState, setLoadEffState ] = useState(true);
     // fetch data for user
     useEffect( () => {
         // axios call to backend controller to handle callback logic
         const fetchUserData = async () => {
+            setLoadEffState(false);
+
             // fetch parameters from url to pass to backend route
             const urlParams = new URLSearchParams(window.location.search);
             const spotCode = urlParams.get('code');
@@ -27,16 +30,19 @@ const Home = () => {
          
             // user denied permissions
             if(spotCode == null) {
+                // I want to set up a message here
+                    // something like: "spotScraper was denied access to profile"
                 navigate('/');
             } else { // continue with PKCE flow
                 try {
-                    const response = await axios.get('/api/music/home', {
-                        params: {
-                            code: spotCode,
-                            state: spotState,
-                        }
+                    console.log('in try block');
+                    const codeVerifier = window.localStorage.getItem('code_verifier');
+
+                    const response = await axios.post('http://localhost:4000/api/music/home', {
+                        code_verifier: codeVerifier,
+                        code: spotCode,
+                        state: spotState,
                     });
-    
                     console.log(response);
                 } catch (err) {
                     console.log(err);
@@ -45,7 +51,7 @@ const Home = () => {
         }
 
         fetchUserData();
-    }, []); // empty parameter list, only want 
+    }, [ loadEffState ]); // empty parameter list, only want 
 
     return (
         <h1>Home Page</h1>

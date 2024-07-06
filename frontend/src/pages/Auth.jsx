@@ -1,11 +1,19 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faSpotify} from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
-
+//import { generateRandomString } from '../../../backend/controllers/musicController';
 // should pass in a user possibly
     // response from call to authorization endpoint should be stored
     // and used to update the current user's information
+
+
 const Auth = () => {
+
+    const generateRandomString = (length) => {
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const values = crypto.getRandomValues(new Uint8Array(length));
+        return values.reduce((acc, x) => acc + possible[x % possible.length], "");
+    }
 
     const handleAuth = async (e) => {
             e.preventDefault();
@@ -20,8 +28,15 @@ const Auth = () => {
                 // User can have a token document
             // from response make a post request to update user information
             try {
-                const response = await axios.get('/api/music/login', {
-                    headers: {
+                const state = generateRandomString(16);
+                const codeVerifier = generateRandomString(64);
+
+                window.localStorage.setItem('code_verifier', codeVerifier);
+
+                const response = await axios.post('/api/music/login', {
+                    state, 
+                    code_verifier: codeVerifier,
+                }, { headers: {
                         'Access-Control-Allow-Origin': 'http://localhost:3000/',
                     }
                 });
