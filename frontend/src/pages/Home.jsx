@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+//  import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 
 /*
@@ -16,13 +16,17 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 */
 const Home = () => {
     const navigate = useNavigate();
-    const [ loadEffState, setLoadEffState ] = useState(true);
+    const [accessToken, setAccessToken] = useState('');
+    const [refreshToken, setRefreshToken] = useState('');
+    // maybe create states for access_token, refresh_token, etc.
+    // update these after receiving a response from the backend
+    // use these states to perform a request to create a new user
+
     // fetch data for user
     useEffect( () => {
         // axios call to backend controller to handle callback logic
         const fetchUserData = async () => {
-            setLoadEffState(false);
-
+            // setLoadEffState(false);
             // fetch parameters from url to pass to backend route
             const urlParams = new URLSearchParams(window.location.search);
             const spotCode = urlParams.get('code');
@@ -35,15 +39,19 @@ const Home = () => {
                 navigate('/');
             } else { // continue with PKCE flow
                 try {
-                    console.log('in try block');
                     const codeVerifier = window.localStorage.getItem('code_verifier');
 
-                    const response = await axios.post('http://localhost:4000/api/music/home', {
+                    console.log("CodeVerifier on frontend:", codeVerifier)
+
+                    const response = await axios.post('/api/music/home', {
                         code_verifier: codeVerifier,
                         code: spotCode,
                         state: spotState,
                     });
                     console.log(response);
+                    // if response contains access_token, etc. make another request to instantiate a user
+                    setAccessToken(response.data.access_token);
+                    setRefreshToken(response.data.refresh_token);
                 } catch (err) {
                     console.log(err);
                 }
@@ -51,10 +59,15 @@ const Home = () => {
         }
 
         fetchUserData();
-    }, [ loadEffState ]); // empty parameter list, only want 
+    }, []); // empty parameter list, only want the effect to trigger once
+
+    console.log(accessToken);
+    console.log(refreshToken);
 
     return (
-        <h1>Home Page</h1>
+        <div>
+            <h1>Home Page</h1>
+        </div>
     )
 
 }

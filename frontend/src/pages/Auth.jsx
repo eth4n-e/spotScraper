@@ -31,6 +31,8 @@ const Auth = () => {
                 const state = generateRandomString(16);
                 const codeVerifier = generateRandomString(64);
 
+                // saving in localStorage prior to creating a new user
+                // wanted to prevent frequent user creation and deletion
                 window.localStorage.setItem('code_verifier', codeVerifier);
 
                 const response = await axios.post('/api/music/login', {

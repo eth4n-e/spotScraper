@@ -10,7 +10,7 @@ const { URLSearchParams } = require('url');
 
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
+// const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'http://localhost:3000/home'; // url to redirect back to after authorization
 
 
@@ -75,23 +75,16 @@ const register = async(req, res) => {
 
 const redirectToSpotifyAuth = async (req, res) => {
     // protection against attacks
-    const state = generateRandomString(16);
+    const state = req.body.state;
     // spotify functionality we want to access
     const scopes = 'user-read-private user-read-email';
 
-    // generate code challenge for PKCE code flow
-    const codeVerifier = generateRandomString(64);
-    // saving in localStorage prior to creating a new user
-    // wanted to prevent frequent user creation and deletion
-    // after user agrees to settings then create a user
-        // may need to create a check to see if a user has registered if I want either:
-            // 1) one time agreeance to privileges
-            // or
-            // 2) must agree each time (think I prefer)
-
-    const hashedVerifier = sha256(codeVerifier);
+    // receive code verifier for use in PKCE flow
+    const codeVerifier = req.body.code_verifier;
+    const hashedVerifier = await sha256(codeVerifier);
     const codeChallenge = base64encode(hashedVerifier);
 
+    console.log("Code challenge in backend: ", codeChallenge);
 
     // pass the authorization url to the frontend
     // frontend handles redirect to spotify's authorization page
@@ -129,7 +122,7 @@ const exchangeCodeForToken = async (code, codeVerifier) => {
             body: new URLSearchParams({
                 client_id: clientId,
                 grant_type: 'authorization_code',
-                code,
+                code: code,
                 redirect_uri: redirectUri,
                 code_verifier: codeVerifier,
             }),
@@ -146,10 +139,9 @@ const exchangeCodeForToken = async (code, codeVerifier) => {
 }
 
 const postHome = async (req, res) => {
-    console.log('in callback');
-    console.log('Request Object: ', req);
-
     const codeVerifier = req.body.code_verifier;
+    console.log("CodeVerifier on backend: ", codeVerifier);
+
     const code = req.body.code || null;
     const state = req.body.state || null;
   
@@ -163,6 +155,7 @@ const postHome = async (req, res) => {
     } else {
       try {
           const tokenResponse = await exchangeCodeForToken(code, codeVerifier);
+          console.log("postHome route tokenResponse: ", tokenResponse);
 
           return res.status(200).json(tokenResponse);
           // to-do: create a mongoDB user upon successful tokenResponse
