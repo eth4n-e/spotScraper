@@ -84,8 +84,6 @@ const redirectToSpotifyAuth = async (req, res) => {
     const hashedVerifier = await sha256(codeVerifier);
     const codeChallenge = base64encode(hashedVerifier);
 
-    console.log("Code challenge in backend: ", codeChallenge);
-
     // pass the authorization url to the frontend
     // frontend handles redirect to spotify's authorization page
     try {
@@ -110,8 +108,6 @@ const redirectToSpotifyAuth = async (req, res) => {
 
 const exchangeCodeForToken = async (code, codeVerifier) => {
     try {
-        
-
         const tokenEndpoint = "https://accounts.spotify.com/api/token";
     
         const tokenResponse = await fetch(tokenEndpoint, {
@@ -127,8 +123,6 @@ const exchangeCodeForToken = async (code, codeVerifier) => {
                 code_verifier: codeVerifier,
             }),
         });
-
-        console.log('exchangeCodeForToken tokenResponse: ', tokenResponse);
 
         return await tokenResponse.json();
         // to-do: create a mongoDB user upon successful tokenResponse
@@ -155,7 +149,14 @@ const postHome = async (req, res) => {
     } else {
       try {
           const tokenResponse = await exchangeCodeForToken(code, codeVerifier);
-          console.log("postHome route tokenResponse: ", tokenResponse);
+
+          const accessToken = tokenResponse.access_token;
+          const refreshToken = tokenResponse.refresh_token;
+          const expiresIn = tokenResponse.expires_in;
+
+          if(accessToken && refreshToken && expiresIn) {
+            console.log('Successful token generation');
+          }
 
           return res.status(200).json(tokenResponse);
           // to-do: create a mongoDB user upon successful tokenResponse
