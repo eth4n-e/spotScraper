@@ -41,33 +41,34 @@ const homeDataLoader = async () => {
   const spotCode = urlParams.get('code');
   const spotState = urlParams.get('state');
 
-  console.log('Code', spotCode);
-  console.log('State', spotState);
+  try {
+      const codeVerifier = window.localStorage.getItem('code_verifier');
+      // make request to backend controller which handles token exchange
+      const tokenResponse = await axios.post('/api/music/home', {
+          code_verifier: codeVerifier,
+          code: spotCode,
+          state: spotState,
+      });
 
-  // user denied permissions
-  if(spotCode == null) {
-    // I want to set up a message here
-        // something like: "spotScraper was denied access to profile"
-    // return redirect('/');
-    console.log('Null spotCode');
-  } else { // continue with PKCE flow
-    try {
-        const codeVerifier = window.localStorage.getItem('code_verifier');
+      // const accessToken = tokenResponse.access_token;
+      // const refreshToken = tokenResponse.refresh_token;
+      // const expiresIn = tokenResponse.expires_in;
 
-        console.log(codeVerifier);
+      // console.log('Token', accessToken);
 
-        const response = await axios.post('/api/music/home', {
-            code_verifier: codeVerifier,
-            code: spotCode,
-            state: spotState,
-        });
+      // const userResponse = await axios.post('/api/music/user', {
+      //   accessToken,
+      //   refreshToken,
+      //   expiresIn,
+      // });
 
-        return response;
+      return tokenResponse;
 
-    } catch (err) {
-        console.log(err);
-    }
-}
+  } catch (err) {
+      console.error(err);
+      // Authorization was denied, redirect back to authorize page
+      return redirect('/');
+  }
 }
 
 const router = createBrowserRouter([

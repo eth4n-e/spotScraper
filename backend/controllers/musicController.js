@@ -14,8 +14,7 @@ const clientId = process.env.CLIENT_ID;
 const redirectUri = 'http://localhost:3000/home'; // url to redirect back to after authorization
 
 
-/** HELPER METHODS TO IMPLEMENT SPOTIFY AUTHORIZATION PKCE FLOW */
-
+/** HELPER METHODS TO IMPLEMENT SPOTIFY AUTHORIZATION PKCE FLOW **/
 // method to generate a code verifier (high-entropy cryptographic string)
 const generateRandomString = (length) => {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -38,7 +37,7 @@ const base64encode = (input) => {
       .replace(/\+/g, '-')
       .replace(/\//g, '_');
 }  
-/** */
+/** HELPER METHODS TO IMPLEMENT SPOTIFY AUTHORIZATION PKCE FLOW **/
 
 /* TO DO: register route
     - register a user in the db
@@ -73,6 +72,8 @@ const register = async(req, res) => {
     }
 }
 
+/*******************/
+/** AUTHORIZATION **/
 const redirectToSpotifyAuth = async (req, res) => {
     // protection against attacks
     const state = req.body.state;
@@ -105,7 +106,11 @@ const redirectToSpotifyAuth = async (req, res) => {
         res.status(500).json({'error': err});
     }
 }
+/** AUTHORIZATION **/
+/*******************/
 
+/***************************/
+/** ACCESS TOKEN EXCHANGE **/
 const exchangeCodeForToken = async (code, codeVerifier) => {
     try {
         const tokenEndpoint = "https://accounts.spotify.com/api/token";
@@ -132,7 +137,7 @@ const exchangeCodeForToken = async (code, codeVerifier) => {
     }
 }
 
-const postHome = async (req, res) => {
+const getAccessToken = async (req, res) => {
     const codeVerifier = req.body.code_verifier;
     console.log("CodeVerifier on backend: ", codeVerifier);
 
@@ -141,11 +146,8 @@ const postHome = async (req, res) => {
   
     console.log("Code: ", code);
     console.log("State: ", state);
-    if (state === null) {
-      res.redirect('/#' +
-        querystring.stringify({
-          error: 'state_mismatch'
-        }));
+    if (state === null || code === null) {
+      res.status(500).json({error: 'State mismatch'});
     } else {
       try {
           const tokenResponse = await exchangeCodeForToken(code, codeVerifier);
@@ -166,6 +168,71 @@ const postHome = async (req, res) => {
       }
     }
 }
+/** ACCESS TOKEN EXCHANGE **/
+/***************************/
+
+/*******************************/
+/** USER RETRIEVAL & CREATION **/
+const getUserInfoSpotify = async (accessToken) => {
+    // use spotify's get current user profile API route to retrieve user name and email associated with user
+    try {
+        const userResponse = await axios.get('https://api.spotify.com/v1/me', {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('User Response:', userResponse);
+        return await userResponse.json();
+    } catch (err) {
+        console.error('Error retrieving information about the user: ', err);
+        throw new Error('Unable to retrieve user information');
+    }
+}
+
+// check if user already exists based on spotify user id
+// if so
+    // return existing user object
+// else 
+    // make request to spotify's getUserProfile api route
+        // fetch user name, email, user id
+    // instantiate a new User with data from spotify + access token + refresh token + expiration time
+    // return new User
+const createUser = async (req, res) => {
+    try {
+        const accessToken = req.body.accessToken;
+        // access user info via spotify api
+        const userResponse = await getUserInfoSpotify(accessToken);
+        // search for user based on their spotify id
+        const user = await User.find(userResponse.id);
+
+        if(user) { // existing user
+            return user;
+        } else { // create user
+            // extract important information
+            const [userName, userEmail, userId] = [userResponse.display_name, userResponse.email, userResponse.id];
+            const refreshToken = req.body.refreshToken;
+            const expiresIn = req.body.expiresIn;
+
+            const newUser = await User.create({
+                name: userName, 
+                email: userEmail,
+                id: userId,
+                accessToken,
+                refreshToken,
+                tokenExpiration: expiresIn,
+            });
+
+            return res.status(200).json(newUser);
+        }
+    } catch(err) {
+        return res.status(400).json({error: 'Error in user creation process'});
+    }
+
+}
+/** USER RETRIEVAL & CREATION **/
+/*******************************/
 
 // get all tracks
 // make request to spotify api to get top tracks for user
@@ -214,8 +281,10 @@ const createTrack = async (req, res) => {
 module.exports = {
     generateRandomString,
     redirectToSpotifyAuth,
-    postHome,
+    getAccessToken,
     exchangeCodeForToken,
+    getUserInfoSpotify,
+    createUser,
     register,
     getTracks,
     getTrack,
