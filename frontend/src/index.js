@@ -50,19 +50,18 @@ const homeDataLoader = async () => {
           state: spotState,
       });
 
-      // const accessToken = tokenResponse.access_token;
-      // const refreshToken = tokenResponse.refresh_token;
-      // const expiresIn = tokenResponse.expires_in;
+      const accessToken = tokenResponse.data.access_token;
+      const refreshToken = tokenResponse.data.refresh_token;
+      const expiresIn = tokenResponse.data.expires_in;
 
-      // console.log('Token', accessToken);
+      const userResponse = await axios.post('/api/music/user', {
+        accessToken,
+        refreshToken,
+        expiresIn,
+      });
 
-      // const userResponse = await axios.post('/api/music/user', {
-      //   accessToken,
-      //   refreshToken,
-      //   expiresIn,
-      // });
-
-      return tokenResponse;
+      // axios automatically parses the response to a JSON object (unlike fetch)
+      return userResponse;
 
   } catch (err) {
       console.error(err);

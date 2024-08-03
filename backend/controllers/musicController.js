@@ -176,15 +176,16 @@ const getAccessToken = async (req, res) => {
 const getUserInfoSpotify = async (accessToken) => {
     // use spotify's get current user profile API route to retrieve user name and email associated with user
     try {
-        const userResponse = await axios.get('https://api.spotify.com/v1/me', {
+        const userResponse = await fetch('https://api.spotify.com/v1/me', {
+            method: "GET",
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             }
         });
 
-        console.log('User Response:', userResponse);
-        return await userResponse.json();
+        // return the body content of the response in json format
+        return await userResponse.json(); 
     } catch (err) {
         console.error('Error retrieving information about the user: ', err);
         throw new Error('Unable to retrieve user information');
@@ -205,20 +206,25 @@ const createUser = async (req, res) => {
         // access user info via spotify api
         const userResponse = await getUserInfoSpotify(accessToken);
         // search for user based on their spotify id
-        const user = await User.find(userResponse.id);
+
+        const user = await User.findById(userResponse.id);
 
         if(user) { // existing user
-            return user;
+            return res.status(200).json(user);
         } else { // create user
             // extract important information
-            const [userName, userEmail, userId] = [userResponse.display_name, userResponse.email, userResponse.id];
+            const userName = userResponse.display_name;
+            const userEmail = userResponse.email;
+            const userId = userResponse.id;
+            const userImg = userResponse.images[0].url || '../public/discoBall.png';
             const refreshToken = req.body.refreshToken;
             const expiresIn = req.body.expiresIn;
 
             const newUser = await User.create({
+                _id: userId,
                 name: userName, 
                 email: userEmail,
-                id: userId,
+                profilePic: userImg,
                 accessToken,
                 refreshToken,
                 tokenExpiration: expiresIn,

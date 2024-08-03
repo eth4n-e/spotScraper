@@ -76,6 +76,7 @@ const Home = () => {
     return (
         <div>
             <h1>Home Page</h1>
+            <img src={accessData.data.profilePic} alt="Profile Pic"/>
         </div>
     )
 
