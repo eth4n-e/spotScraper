@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLoaderData } from 'react-router-dom';
+import Navbar from '../components/navbar';
 import axios from 'axios';
 //  import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
@@ -20,6 +21,7 @@ const Home = () => {
 
     return (
         <div>
+            <Navbar profilePic={accessData.data.profilePic}/>
             <h1>Home Page</h1>
             <img src={accessData.data.profilePic} alt="Profile Pic"/>
         </div>
