@@ -8,7 +8,13 @@ const Schema = mongoose.Schema
     // potential add-ons:
         // a way to connect users to playlists
 const userSchema = new Schema({
-    codeVerifier: {
+    _id: String,
+    profilePic: String,
+    name: {
+        type: String,
+        required: true,
+    },
+    email: {
         type: String,
         required: true,
     },
