@@ -11,31 +11,6 @@ import axios from 'axios';
 import Auth from './pages/Auth';
 import Home from './pages/Home';
 
-// function App() {
-//   return (
-//     <div className="App">
-//       <BrowserRouter>
-//         <div className="pages">
-//           <Routes>
-//             <Route
-//               path='/'
-//               element={<Auth />}
-//             />
-//             <Route
-//               path='/login'
-//               element={<Login />}
-//             />
-//             <Route
-//               path='/home'
-//               element={<Home />}
-//             />
-//           </Routes>
-//         </div>
-//       </BrowserRouter>
-//     </div>
-//   );
-// }
-
 const homeDataLoader = async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const spotCode = urlParams.get('code');
