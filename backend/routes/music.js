@@ -21,8 +21,7 @@ router.post('/register', register);
 // login
     // react will handle getting login page and redirects 
 router.post('/login', redirectToSpotifyAuth);
-// router.post('/login', login);
-//router.get('/home', home);
+
 router.post('/home', getAccessToken, exchangeCodeForToken);
 
 router.post('/user', createUser, getUserInfoSpotify);

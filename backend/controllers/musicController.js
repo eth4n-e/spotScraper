@@ -210,6 +210,7 @@ const createUser = async (req, res) => {
         const user = await User.findById(userResponse.id);
 
         if(user) { // existing user
+            user.profilePic = userResponse.images[0].url;
             return res.status(200).json(user);
         } else { // create user
             // extract important information

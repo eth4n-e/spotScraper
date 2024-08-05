@@ -10,6 +10,8 @@ import axios from 'axios';
 // pages & components
 import Auth from './pages/Auth';
 import Home from './pages/Home';
+import TopTracks from './pages/TopTracks';
+import Playlists from './pages/Playlists';
 
 const homeDataLoader = async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -54,6 +56,14 @@ const router = createBrowserRouter([
     path: "/home",
     element: <Home/>,
     loader: homeDataLoader,
+  },
+  {
+    path:'/toptracks',
+    element: <TopTracks/>,
+  },
+  {
+    path:'/playlists',
+    element: <Playlists/>,
   }
 ])
 

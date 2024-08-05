@@ -19,6 +19,7 @@ const Home = () => {
     const navigate = useNavigate();
     const accessData = useLoaderData();
 
+    console.log('Profile pic homepage: ', accessData.data.profilePic);
     return (
         <div>
             <Navbar profilePic={accessData.data.profilePic}/>
