@@ -11,7 +11,7 @@ const { URLSearchParams } = require('url');
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
 // const clientSecret = process.env.CLIENT_SECRET;
-const redirectUri = 'http://localhost:3000/home'; // url to redirect back to after authorization
+const redirectUri = 'http://localhost:3000/login'; // url to redirect back to after authorization
 
 
 /** HELPER METHODS TO IMPLEMENT SPOTIFY AUTHORIZATION PKCE FLOW **/
@@ -39,46 +39,13 @@ const base64encode = (input) => {
 }  
 /** HELPER METHODS TO IMPLEMENT SPOTIFY AUTHORIZATION PKCE FLOW **/
 
-/* TO DO: register route
-    - register a user in the db
-        - store username, email, password in db
-            - hash password for security
-*/
-const register = async(req, res) => {
-    const {email, username, password} = req.body;
-
-    try {
-        const hash = await bcrypt.hash(password, 10);
-        // check if user exists by email
-        const user = await User.find({email});
-        // no user
-            // add to db 
-        if(!user) {
-            const authToken = undefined;
-            const refreshToken = undefined;
-            const tokenExpiration = undefined;
-
-            // create new user with hashed password
-                // set authentications to undefined
-                // update these upon login
-                    // in other requests, refresh the spotify token
-            const newUser = await User.create(email, username, hash, authToken, refreshToken, tokenExpiration);
-            res.status(200).json({user: newUser});
-        } else {
-            res.status(400).json({error: 'User already exists'});
-        }
-    } catch(err) {
-        res.status(400).json({ error: err });
-    }
-}
-
 /*******************/
 /** AUTHORIZATION **/
 const redirectToSpotifyAuth = async (req, res) => {
     // protection against attacks
     const state = req.body.state;
     // spotify functionality we want to access
-    const scopes = 'user-read-private user-read-email';
+    const scopes = 'user-read-private user-read-email playlist-modify-private playlist-modify-public playlist-read-collaborative user-top-read user-library-modify user-library-read';
 
     // receive code verifier for use in PKCE flow
     const codeVerifier = req.body.code_verifier;
@@ -130,7 +97,6 @@ const exchangeCodeForToken = async (code, codeVerifier) => {
         });
 
         return await tokenResponse.json();
-        // to-do: create a mongoDB user upon successful tokenResponse
     } catch(err) {
         console.error('Error obtaining token:', err);
         throw new Error('Failed to obtain Spotify access token');
@@ -139,26 +105,15 @@ const exchangeCodeForToken = async (code, codeVerifier) => {
 
 const getAccessToken = async (req, res) => {
     const codeVerifier = req.body.code_verifier;
-    console.log("CodeVerifier on backend: ", codeVerifier);
 
     const code = req.body.code || null;
     const state = req.body.state || null;
   
-    console.log("Code: ", code);
-    console.log("State: ", state);
     if (state === null || code === null) {
       res.status(500).json({error: 'State mismatch'});
     } else {
       try {
           const tokenResponse = await exchangeCodeForToken(code, codeVerifier);
-
-          const accessToken = tokenResponse.access_token;
-          const refreshToken = tokenResponse.refresh_token;
-          const expiresIn = tokenResponse.expires_in;
-
-          if(accessToken && refreshToken && expiresIn) {
-            console.log('Successful token generation');
-          }
 
           return res.status(200).json(tokenResponse);
           // to-do: create a mongoDB user upon successful tokenResponse
@@ -206,16 +161,15 @@ const createUser = async (req, res) => {
         // access user info via spotify api
         const userResponse = await getUserInfoSpotify(accessToken);
         // search for user based on their spotify id
-
         const user = await User.findById(userResponse.id);
 
         if(user) { // existing user
-            user.profilePic = userResponse.images[0].url;
             return res.status(200).json(user);
-        } else { // create user
+        } else if (userResponse.email === req.body.email) { // create user if provided email matches one associated with their account
             // extract important information
             const userName = userResponse.display_name;
-            const userEmail = userResponse.email;
+            const userEmail = req.body.email;
+            const userPassword = req.body.password;
             const userId = userResponse.id;
             const userImg = userResponse.images[0].url || '../public/discoBall.png';
             const refreshToken = req.body.refreshToken;
@@ -225,6 +179,7 @@ const createUser = async (req, res) => {
                 _id: userId,
                 name: userName, 
                 email: userEmail,
+                password: userPassword,
                 profilePic: userImg,
                 accessToken,
                 refreshToken,
@@ -232,6 +187,8 @@ const createUser = async (req, res) => {
             });
 
             return res.status(200).json(newUser);
+        } else {
+            return res.status(401).json({error: 'User does not exist or provided email does not match email connected to spotify account'});
         }
     } catch(err) {
         return res.status(400).json({error: 'Error in user creation process'});
@@ -292,7 +249,6 @@ module.exports = {
     exchangeCodeForToken,
     getUserInfoSpotify,
     createUser,
-    register,
     getTracks,
     getTrack,
     createTrack
