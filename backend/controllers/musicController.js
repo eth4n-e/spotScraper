@@ -170,6 +170,7 @@ const createUser = async (req, res) => {
             const userName = userResponse.display_name;
             const userEmail = req.body.email;
             const userPassword = req.body.password;
+            const userCountry = userResponse.country;
             const userId = userResponse.id;
             const userImg = userResponse.images[0].url || '../public/discoBall.png';
             const refreshToken = req.body.refreshToken;
@@ -180,6 +181,7 @@ const createUser = async (req, res) => {
                 name: userName, 
                 email: userEmail,
                 password: userPassword,
+                country: userCountry,
                 profilePic: userImg,
                 accessToken,
                 refreshToken,
@@ -198,49 +200,74 @@ const createUser = async (req, res) => {
 /** USER RETRIEVAL & CREATION **/
 /*******************************/
 
+/***********************************/
+/** TRACK RETRIEVAL & INPUT TO DB **/
+
+// fetch tracks from spotify
+const getSpotifyTracks = async (req, res) => {
+    const token = req.body.token;
+    const country = req.body.country;
+
+    try {
+        const trackResponse = await fetch('https://api.spotify.com/v1/me/tracks', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+
+            }
+        });
+
+        return await trackResponse.json();
+    } catch (err) {
+        res.status(401).json({error: err})
+    }
+}
+
+/** TRACK RETRIEVAL & INPUT TO DB **/
+/***********************************/
 // get all tracks
 // make request to spotify api to get top tracks for user
-const getTracks = async(req, res) => {
-    // find searches database for tracks
-        // can specify properties like so
-            // Music.find({artist_name: 'Nas'})
-            // would grab all tracks with Nas as the artist
-    const tracks = await Track.find({});
+// const getTracks = async(req, res) => {
+//     // find searches database for tracks
+//         // can specify properties like so
+//             // Music.find({artist_name: 'Nas'})
+//             // would grab all tracks with Nas as the artist
+//     const tracks = await Track.find({});
 
-    res.status(200).json(tracks);
-}
+//     res.status(200).json(tracks);
+// }
 
-// get single track
-const getTrack = async(req, res) => {
-    const { id } = req.params;
+// // get single track
+// const getTrack = async(req, res) => {
+//     const { id } = req.params;
 
-    // ensure track has a valid id
-    if(!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({error: 'No such track'});
-    }
+//     // ensure track has a valid id
+//     if(!mongoose.Types.ObjectId.isValid(id)) {
+//         return res.status(404).json({error: 'No such track'});
+//     }
 
-    // get a particular track
-    const track = await Track.findById(id);
+//     // get a particular track
+//     const track = await Track.findById(id);
 
-    if(!track) {
-        return res.status(404).json({error: 'No such track'});
-    }
+//     if(!track) {
+//         return res.status(404).json({error: 'No such track'});
+//     }
 
-    res.status(200).json(track);
-}
+//     res.status(200).json(track);
+// }
 
-// create a track
-const createTrack = async (req, res) => {
-    const {title, artist_name} = req.body;
+// // create a track
+// const createTrack = async (req, res) => {
+//     const {title, artist_name} = req.body;
 
-    // add doc to db
-    try {
-        const track = await Track.create({title, artist_name});
-        res.status(200).json(track);
-    } catch(error) {
-        res.status(400).json({error: error.message});
-    }
-}
+//     // add doc to db
+//     try {
+//         const track = await Track.create({title, artist_name});
+//         res.status(200).json(track);
+//     } catch(error) {
+//         res.status(400).json({error: error.message});
+//     }
+// }
 
 module.exports = {
     generateRandomString,
@@ -249,7 +276,5 @@ module.exports = {
     exchangeCodeForToken,
     getUserInfoSpotify,
     createUser,
-    getTracks,
-    getTrack,
-    createTrack
+    getSpotifyTracks,
 }

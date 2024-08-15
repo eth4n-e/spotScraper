@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLoaderData, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import axios from 'axios';
 //  import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -18,13 +18,34 @@ import axios from 'axios';
 const LikedSongs = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const user = location.user;
+    const [tracks, setTracks] = useState([]);
+    // fetch data submitted by login form
+    const user  = location.state?.user;
 
-    console.log(user);
+    useEffect( () => {
+        async function fetchTracks() {
+            const trackData = await axios.get('/api/music/getSpotifyTracks', {
+                token: user.accessToken,
+                country: user.country,
+            });
+
+            if(!ignore) {
+                setTracks(trackData.data);
+            }
+        }
+        let ignore = false;
+        fetchTracks();
+        return () => {
+            ignore = true;
+        }
+    }, [user.accessToken, user.country])
 
     return (
         <div>
-            <h1>Home Page</h1>
+            <Navbar profilePic={user.profilePic}/>
+            <div>
+
+            </div>
         </div>
     )
 

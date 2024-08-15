@@ -1,5 +1,5 @@
 import {React, useState} from 'react';
-import { useNavigate, useLoaderData } from 'react-router-dom';
+import { useNavigate, useLoaderData, Form } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
@@ -20,6 +20,7 @@ const Login = () => {
             const refreshToken = token.refresh_token;
             const expiresIn = token.expires_in;
 
+            // create user / return existing user
             const userResponse = await axios.post('/api/music/login', {
                 accessToken,
                 refreshToken,
@@ -28,7 +29,9 @@ const Login = () => {
                 password,
             })
 
-            navigate('/likedsongs', { user: userResponse })
+            //  navigate to likedsongs while passing user data to the page
+                // data will be fetched with useLocation
+            navigate('/likedsongs', { state: { user: userResponse.data } })
         } catch (err) {
             console.log(err);
         }
@@ -42,7 +45,7 @@ const Login = () => {
                     </h2>
                 </div>
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" onSubmit={(e) => handleSubmit(e, tokenData.data)}>
+                    <Form className="space-y-6" onSubmit={(e) => handleSubmit(e, tokenData.data)}>
                         <div>
                             <label htmlFor="email" className="block text-base font-semibold leading-6 text-brown3">
                                 Email address
@@ -90,7 +93,7 @@ const Login = () => {
                                 Sign in
                             </button>
                         </div>
-                    </form>
+                    </Form>
                 </div>
             </div>
     );
