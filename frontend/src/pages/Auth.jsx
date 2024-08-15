@@ -35,7 +35,7 @@ const Auth = () => {
                 // wanted to prevent frequent user creation and deletion
                 window.localStorage.setItem('code_verifier', codeVerifier);
 
-                const response = await axios.post('/api/music/login', {
+                const response = await axios.post('/api/music/auth', {
                     state, 
                     code_verifier: codeVerifier,
                 }, { headers: {

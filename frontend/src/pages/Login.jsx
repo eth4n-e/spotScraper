@@ -1,34 +1,98 @@
-import React, {useState} from 'react';
+import {React, useState} from 'react';
+import { useNavigate, useLoaderData } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
+    const navigate = useNavigate();
+    const tokenData = useLoaderData();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    // need to handleSubmit, make call to login route
+    // submit form
+        // pass token which was received upon render
+        // use token to create a new user w/ given email and password
+            // if user already exists, return existing user
+    const handleSubmit = async (e, token) => {
+        e.preventDefault();
+
+        try {
+            const accessToken = token.access_token;
+            const refreshToken = token.refresh_token;
+            const expiresIn = token.expires_in;
+
+            const userResponse = await axios.post('/api/music/login', {
+                accessToken,
+                refreshToken,
+                expiresIn,
+                email,
+                password,
+            })
+
+            navigate('/likedsongs', { user: userResponse })
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
-        // add states for email, password (onChange, e.target.name)
-        // add a submit handler to make a call to post login route
+        <div className="h-screen flex flex-1 flex-col justify-center bg-beige">
+                <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+                    <h2 className='-mt-4 text-center text-2xl font-extrabold leading-9 tracking-tight text-brown3'>
+                        Sign in
+                    </h2>
+                </div>
+                <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+                    <form className="space-y-6" onSubmit={(e) => handleSubmit(e, tokenData.data)}>
+                        <div>
+                            <label htmlFor="email" className="block text-base font-semibold leading-6 text-brown3">
+                                Email address
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                value={email}
+                                placeholder="Email connected to your Spotify account"
+                                required
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="block w-full rounded-md border-0 py-1.5 px-1 text-brown2 shadow-sm ring-1 ring-inset ring-brown3 placeholder:text-brown1 placeholder:italic focus:ring-2 focus:ring-inset focus:ring-brown3 sm:text-sm sm:leading-6"
+                                />
+                            </div>
+                        </div>
 
-        // add onSubmit={handleSubmit} when handler is created
-        <form>
-            <div className="absolute bottom-0 left-0 bg-lime size-full p-0 mx-auto">
-                <div className='bg-dark w-8/12 h-4/6 mx-auto rounded-xl'>
-                    <div className="mt-10 grid grid-cols-1 gap-y-6 justify-items-center">
-                        <h2 className="text-lime text-center mt-20">Register</h2>
-                        <label htmlFor="email" className="text-lime">
-                            Email
-                            <input type="text" name="email" id="email" className="block rounded-md" value={email} onChange={(e) => setEmail(e.target.value)}/>
-                        </label>
-                        <label htmlFor="password" className="text-lime">
-                            Password
-                            <input type="text" name="password" id="password" className="block rounded-md" value={password} onChange={(e) => setPassword(e.target.value)}/>
-                        </label>
-                    </div>
-                    <button type="submit" className="bg-lime rounded-md text-dark">Login</button>
+                        <div>
+                            <div className="flex items-center justify-between">
+                                <label htmlFor="password" className="block text-base font-semibold leading-6 text-brown3">
+                                Password
+                                </label>
+                            </div>
+                            <div className="mt-2">
+                                <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                value={password}
+                                placeholder="8 character password"
+                                minLength={8}
+                                required
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="block w-full rounded-md border-0 py-1.5 px-1 text-brown2 shadow-sm ring-1 ring-inset ring-brown3 placeholder:text-brown1 placeholder:italic focus:ring-2 focus:ring-inset focus:ring-brown3 sm:text-sm sm:leading-6"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <button
+                                type="submit"
+                                className="flex w-full mt-10 justify-center rounded-md bg-brown3 px-3 py-1.5 text-sm font-semibold leading-6 text-beige shadow-md hover:bg-brown2 hover:outline hover:outline-2 hover:outline-offset-2 hover:outline-brown3"
+                            >
+                                Sign in
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </form>
     );
 }
 

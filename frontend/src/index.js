@@ -1,7 +1,9 @@
 import {
   createBrowserRouter,  
   RouterProvider, 
-  redirect } from 'react-router-dom'
+  redirect, 
+  createRoutesFromElements,
+  Route} from 'react-router-dom'
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
@@ -9,9 +11,12 @@ import axios from 'axios';
 
 // pages & components
 import Auth from './pages/Auth';
-import Home from './pages/Home';
+import LikedSongs from './pages/LikedSongs';
+import Login from './pages/Login';
+import TopTracks from './pages/TopTracks';
+import Playlists from './pages/Playlists';
 
-const homeDataLoader = async () => {
+const loginLoader = async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const spotCode = urlParams.get('code');
   const spotState = urlParams.get('state');
@@ -19,24 +24,14 @@ const homeDataLoader = async () => {
   try {
       const codeVerifier = window.localStorage.getItem('code_verifier');
       // make request to backend controller which handles token exchange
-      const tokenResponse = await axios.post('/api/music/home', {
+      const tokenResponse = await axios.post('/api/music/getToken', {
           code_verifier: codeVerifier,
           code: spotCode,
           state: spotState,
       });
 
-      const accessToken = tokenResponse.data.access_token;
-      const refreshToken = tokenResponse.data.refresh_token;
-      const expiresIn = tokenResponse.data.expires_in;
-
-      const userResponse = await axios.post('/api/music/user', {
-        accessToken,
-        refreshToken,
-        expiresIn,
-      });
-
       // axios automatically parses the response to a JSON object (unlike fetch)
-      return userResponse;
+      return tokenResponse;
 
   } catch (err) {
       console.error(err);
@@ -51,9 +46,30 @@ const router = createBrowserRouter([
     element: <Auth />,
   },
   {
-    path: "/home",
-    element: <Home/>,
-    loader: homeDataLoader,
+    path:'/login',
+    element: <Login />,
+    loader: loginLoader,
+    // check if the code & state are the same as before, if this is the case, the user has simply refreshed the page
+    // create and store the user before
+    shouldRevalidate: ( currentUrl, nextUrl ) => { // avoid revalidation if url is the same
+      console.log('Current url:', currentUrl);
+      console.log('Next Url:', nextUrl);
+      return currentUrl.pathname !== nextUrl.pathname
+    },
+  },
+  {
+    path: "/likedsongs",
+    element: <LikedSongs/>,
+    // loader: homeDataLoader,
+    // shouldRevalidate
+  },
+  {
+    path:'/toptracks',
+    element: <TopTracks/>,
+  },
+  {
+    path:'/playlists',
+    element: <Playlists/>,
   }
 ])
 

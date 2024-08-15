@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLoaderData } from 'react-router-dom';
+import { useNavigate, useLoaderData, useLocation } from 'react-router-dom';
+import Navbar from '../components/navbar';
 import axios from 'axios';
 //  import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
@@ -14,17 +15,19 @@ import axios from 'axios';
         - use state to manage internal state of component (changing info related only to the home page)
         - use context to manage data / state across several components
 */
-const Home = () => {
+const LikedSongs = () => {
+    const location = useLocation();
     const navigate = useNavigate();
-    const accessData = useLoaderData();
+    const user = location.user;
+
+    console.log(user);
 
     return (
         <div>
             <h1>Home Page</h1>
-            <img src={accessData.data.profilePic} alt="Profile Pic"/>
         </div>
     )
 
 }
 
-export default Home
+export default LikedSongs
