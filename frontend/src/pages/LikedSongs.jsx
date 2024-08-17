@@ -42,6 +42,7 @@ const LikedSongs = () => {
         // fetchTracks();
         const fetchTracks = async () => {
             try {
+                console.log('In try block');
                 const fetchedTracks = await axios.post('/api/music/fetchSpotifyTracks', {
                     token: user.accessToken,
                     country: user.country,
@@ -66,6 +67,7 @@ const LikedSongs = () => {
     return (
         <div>
             <Navbar profilePic={user.profilePic}/>
+            <p>{tracks}</p>
         </div>
     )
 

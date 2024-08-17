@@ -220,7 +220,9 @@ const fetchSpotifyTracks = async (req, res) => {
             }
         });
 
-        return await trackResponse.json();
+        const trackData = await trackResponse.json();
+
+        return res.status(200).json(trackData);
         // while(trackEndpoint) {
         //     // make request to spotify's tracks endpoint
         //     const trackResponse = await fetch(trackEndpoint, {
