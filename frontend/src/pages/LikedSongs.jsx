@@ -42,15 +42,13 @@ const LikedSongs = () => {
         // fetchTracks();
         const fetchTracks = async () => {
             try {
-                console.log('In try block');
                 const fetchedTracks = await axios.post('/api/music/fetchSpotifyTracks', {
                     token: user.accessToken,
                     country: user.country,
                 })
 
-                console.log('Tracks from frontend:', fetchedTracks);
-
-                setTracks(fetchedTracks.data.items);
+                const extractTracks = fetchedTracks.data.items.map( (obj) => obj.track);
+                setTracks(extractTracks);
 
                 console.log(tracks);
             } catch(err) {
@@ -62,12 +60,21 @@ const LikedSongs = () => {
         // return () => {
         //     ignore = true;
         // }
-    }, [user.accessToken, user.country, tracks])
+    }, [user.accessToken, user.country])
 
     return (
-        <div>
+        <div className="w-100 bg-beige">
             <Navbar profilePic={user.profilePic}/>
-            <p>{tracks}</p>
+            <div className='mt-4 mx-4 grid grid-cols-4 gap-6'>
+                {
+                    tracks && (tracks.map( (track) => (
+                    <div className="bg-brown3 rounded-md p-1" key={track.id}>
+                        <img className="object-cover rounded-md" src={track.album.images[0].url} alt="Track cover"/>
+                        <p className="text-beige font-semibold">{track.name} by {track.artists[0].name}</p>
+                    </div>  
+                    )))
+                }
+            </div>
         </div>
     )
 
