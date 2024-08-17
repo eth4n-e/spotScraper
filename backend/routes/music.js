@@ -8,7 +8,7 @@ const {
     exchangeCodeForToken,
     getUserInfoSpotify,
     createUser,
-    getSpotifyTracks, 
+    fetchSpotifyTracks, 
 } = require('../controllers/musicController');
 
 // use expresses router to handle all routes
@@ -21,7 +21,7 @@ router.post('/auth', redirectToSpotifyAuth);
 
 router.post('/getToken', getAccessToken, exchangeCodeForToken);
 
-router.get('/getSpotifyTracks', getSpotifyTracks);
+router.post('/fetchSpotifyTracks', fetchSpotifyTracks);
 
 // export router for use in server.js
 module.exports = router;

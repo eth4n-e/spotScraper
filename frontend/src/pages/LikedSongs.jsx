@@ -23,29 +23,49 @@ const LikedSongs = () => {
     const user  = location.state?.user;
 
     useEffect( () => {
-        async function fetchTracks() {
-            const trackData = await axios.get('/api/music/getSpotifyTracks', {
-                token: user.accessToken,
-                country: user.country,
-            });
+        // async function fetchTracks() {
+        //     const trackData = await axios.post('/api/music/getSpotifyTracks', {
+        //         token: user.accessToken,
+        //         country: user.country,
+        //     });
 
-            if(!ignore) {
-                setTracks(trackData.data);
+        //     console.log('Track Data frontend:', trackData);
+
+        //     // if(!ignore) {
+        //     //     setTracks(trackData.data);
+        //     // }
+        //     setTracks(trackData.data);
+        // }
+
+        // // let ignore = false;
+
+        // fetchTracks();
+        const fetchTracks = async () => {
+            try {
+                const fetchedTracks = await axios.post('/api/music/fetchSpotifyTracks', {
+                    token: user.accessToken,
+                    country: user.country,
+                })
+
+                console.log('Tracks from frontend:', fetchedTracks);
+
+                setTracks(fetchedTracks.data.items);
+
+                console.log(tracks);
+            } catch(err) {
+                console.error('Error fetching tracks: ', err);
             }
         }
-        let ignore = false;
+
         fetchTracks();
-        return () => {
-            ignore = true;
-        }
-    }, [user.accessToken, user.country])
+        // return () => {
+        //     ignore = true;
+        // }
+    }, [user.accessToken, user.country, tracks])
 
     return (
         <div>
             <Navbar profilePic={user.profilePic}/>
-            <div>
-
-            </div>
         </div>
     )
 
