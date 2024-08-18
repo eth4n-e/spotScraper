@@ -6,6 +6,7 @@ const {
     redirectToSpotifyAuth,
     getAccessToken,
     exchangeCodeForToken,
+    refreshToken,
     getUserInfoSpotify,
     createUser,
     fetchSpotifyTracks, 
@@ -22,6 +23,8 @@ router.post('/auth', redirectToSpotifyAuth);
 router.post('/getToken', getAccessToken, exchangeCodeForToken);
 
 router.post('/fetchSpotifyTracks', fetchSpotifyTracks);
+
+router.post('/refreshToken', refreshToken);
 
 // export router for use in server.js
 module.exports = router;

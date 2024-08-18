@@ -126,6 +126,27 @@ const getAccessToken = async (req, res) => {
 /** ACCESS TOKEN EXCHANGE **/
 /***************************/
 
+/*******************/
+/** REFRESH TOKEN **/
+const refreshToken = async (refreshToken) => {
+    try {
+        const updatedToken = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            refresh_token: refreshToken,
+            client_id: clientId,
+        }, { headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }});
+
+        return await updatedToken.json();
+    } catch (err) {
+        console.error(err);
+        throw new Error('Unable to refresh spotify token');
+    }
+}
+/** REFRESH TOKEN **/
+/*******************/
+
 /*******************************/
 /** USER RETRIEVAL & CREATION **/
 const getUserInfoSpotify = async (accessToken) => {
@@ -166,7 +187,11 @@ const createUser = async (req, res) => {
 
         if(user && password == user.password && email == user.email) { // existing user + matching credentials
             // refresh token before loggin in to ensure that future requests are handled correctly
+            const updatedToken = await refreshToken(req.body.refreshToken);
 
+            user.accessToken = updatedToken.data.access_token;
+            user.refreshToken = updatedToken.data.refresh_token;
+            user.expiresIn = updatedToken.data.expires_in;
 
             return res.status(200).json(user);
         } else if (userResponse.email === req.body.email) { // create user if provided email matches one associated with their account
@@ -303,6 +328,7 @@ module.exports = {
     redirectToSpotifyAuth,
     getAccessToken,
     exchangeCodeForToken,
+    refreshToken,
     getUserInfoSpotify,
     createUser,
     fetchSpotifyTracks,
