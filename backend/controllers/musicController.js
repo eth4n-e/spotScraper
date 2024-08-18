@@ -158,12 +158,16 @@ const getUserInfoSpotify = async (accessToken) => {
 const createUser = async (req, res) => {
     try {
         const accessToken = req.body.accessToken;
+        const password = req.body.password;
         // access user info via spotify api
         const userResponse = await getUserInfoSpotify(accessToken);
         // search for user based on their spotify id
         const user = await User.findById(userResponse.id);
 
-        if(user) { // existing user
+        if(user && password == user.password && email == user.email) { // existing user + matching credentials
+            // refresh token before loggin in to ensure that future requests are handled correctly
+
+
             return res.status(200).json(user);
         } else if (userResponse.email === req.body.email) { // create user if provided email matches one associated with their account
             // extract important information
@@ -190,7 +194,7 @@ const createUser = async (req, res) => {
 
             return res.status(200).json(newUser);
         } else {
-            return res.status(401).json({error: 'User does not exist or provided email does not match email connected to spotify account'});
+            return res.status(401).json({error: 'User does not exist or credentials do not match'});
         }
     } catch(err) {
         return res.status(400).json({error: 'Error in user creation process'});

@@ -23,23 +23,6 @@ const LikedSongs = () => {
     const user  = location.state?.user;
 
     useEffect( () => {
-        // async function fetchTracks() {
-        //     const trackData = await axios.post('/api/music/getSpotifyTracks', {
-        //         token: user.accessToken,
-        //         country: user.country,
-        //     });
-
-        //     console.log('Track Data frontend:', trackData);
-
-        //     // if(!ignore) {
-        //     //     setTracks(trackData.data);
-        //     // }
-        //     setTracks(trackData.data);
-        // }
-
-        // // let ignore = false;
-
-        // fetchTracks();
         const fetchTracks = async () => {
             try {
                 const fetchedTracks = await axios.post('/api/music/fetchSpotifyTracks', {
@@ -57,9 +40,6 @@ const LikedSongs = () => {
         }
 
         fetchTracks();
-        // return () => {
-        //     ignore = true;
-        // }
     }, [user.accessToken, user.country])
 
     return (
@@ -68,9 +48,9 @@ const LikedSongs = () => {
             <div className='mt-4 mx-4 grid grid-cols-4 gap-6'>
                 {
                     tracks && (tracks.map( (track) => (
-                    <div className="bg-brown3 rounded-md p-1" key={track.id}>
-                        <img className="object-cover rounded-md" src={track.album.images[0].url} alt="Track cover"/>
-                        <p className="text-beige font-semibold">{track.name} by {track.artists[0].name}</p>
+                    <div className="rounded-md p-2 bg-beige2 shadow-2xl" key={track.id}>
+                        <img className="object-cover rounded-md drop-shadow-xl " src={track.album.images[0].url} alt="Track cover"/>
+                        <p className="mt-2 text-brown3 font-semibold">{track.name} by {track.artists[0].name}</p>
                     </div>  
                     )))
                 }
