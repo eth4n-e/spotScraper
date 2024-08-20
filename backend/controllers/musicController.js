@@ -10,7 +10,7 @@ const { URLSearchParams } = require('url');
 
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
-// const clientSecret = process.env.CLIENT_SECRET;
+const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'http://localhost:3000/login'; // url to redirect back to after authorization
 
 
@@ -130,13 +130,25 @@ const getAccessToken = async (req, res) => {
 /** REFRESH TOKEN **/
 const refreshToken = async (refreshToken) => {
     try {
-        const updatedToken = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            refresh_token: refreshToken,
-            client_id: clientId,
-        }, { headers: {
+        const url = 'https://accounts.spotify.com/api/token';
+        const headers = new Headers({
             'Content-Type': 'application/x-www-form-urlencoded',
-        }});
+            'Authorization': 'Basic ' + btoa(`${clientId}:${clientSecret}`)
+        });
+
+        const body = new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        });
+
+
+        const updatedToken = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: body
+        });
+
+        console.log(updatedToken);
 
         return await updatedToken.json();
     } catch (err) {
@@ -180,6 +192,7 @@ const createUser = async (req, res) => {
     try {
         const accessToken = req.body.accessToken;
         const password = req.body.password;
+        const email = req.body.email;
         // access user info via spotify api
         const userResponse = await getUserInfoSpotify(accessToken);
         // search for user based on their spotify id
@@ -187,6 +200,7 @@ const createUser = async (req, res) => {
 
         if(user && password == user.password && email == user.email) { // existing user + matching credentials
             // refresh token before loggin in to ensure that future requests are handled correctly
+            console.log('Pre update token');
             const updatedToken = await refreshToken(req.body.refreshToken);
 
             user.accessToken = updatedToken.data.access_token;
