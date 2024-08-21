@@ -16,26 +16,26 @@ import Login from './pages/Login';
 import TopTracks from './pages/TopTracks';
 import Playlists from './pages/Playlists';
 
-const loginLoader = async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const spotCode = urlParams.get('code');
-  const spotState = urlParams.get('state');
+// const loginLoader = async () => {
+//   const urlParams = new URLSearchParams(window.location.search);
+//   const spotCode = urlParams.get('code');
+//   const spotState = urlParams.get('state');
 
-  try {
-      // make request to backend controller which handles token exchange
-      const tokenResponse = await axios.post('/api/music/getToken', {
-          code: spotCode,
-          state: spotState,
-      });
+//   try {
+//       // make request to backend controller which handles token exchange
+//       const tokenResponse = await axios.post('/api/music/getToken', {
+//           code: spotCode,
+//           state: spotState,
+//       });
 
-      // axios automatically parses the response to a JSON object (unlike fetch)
-      return tokenResponse;
-  } catch (err) {
-      console.error(err);
-      // Authorization was denied, redirect back to authorize page
-      return redirect('/');
-  }
-}
+//       // axios automatically parses the response to a JSON object (unlike fetch)
+//       return tokenResponse;
+//   } catch (err) {
+//       console.error(err);
+//       // Authorization was denied, redirect back to authorize page
+//       return redirect('/');
+//   }
+// }
 
 const router = createBrowserRouter([
   {
@@ -45,14 +45,14 @@ const router = createBrowserRouter([
   {
     path:'/login',
     element: <Login />,
-    loader: loginLoader,
+    // loader: loginLoader,
     // check if the code & state are the same as before, if this is the case, the user has simply refreshed the page
     // create and store the user before
-    shouldRevalidate: ( currentUrl, nextUrl ) => { // avoid revalidation if url is the same
-      console.log('Current url:', currentUrl);
-      console.log('Next Url:', nextUrl);
-      return currentUrl.pathname !== nextUrl.pathname
-    },
+    // shouldRevalidate: ( currentUrl, nextUrl ) => { // avoid revalidation if url is the same
+    //   console.log('Current url:', currentUrl);
+    //   console.log('Next Url:', nextUrl);
+    //   return currentUrl.pathname !== nextUrl.pathname
+    // },
   },
   {
     path: "/likedsongs",

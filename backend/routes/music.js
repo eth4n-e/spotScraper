@@ -5,9 +5,9 @@ const Track = require('../models/trackModel');
 const { 
     redirectToSpotifyAuth,
     getAccessToken,
-    exchangeCodeForToken,
     getUserInfoSpotify,
     createUser,
+    login,
     getTracks, 
     getTrack,
     createTrack,
@@ -17,12 +17,9 @@ const {
 const router = express.Router();
 
 // configure route to be associated with particular controllers
-router.post('/login', createUser, getUserInfoSpotify);
+router.post('/login', login, createUser, getAccessToken, getUserInfoSpotify);
 
 router.post('/auth', redirectToSpotifyAuth);
-
-router.post('/getToken', getAccessToken, exchangeCodeForToken);
-
 
 // export router for use in server.js
 module.exports = router;

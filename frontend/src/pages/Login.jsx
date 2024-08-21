@@ -1,10 +1,10 @@
 import {React, useState} from 'react';
-import { useNavigate, useLoaderData } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
     const navigate = useNavigate();
-    const tokenData = useLoaderData();
+    const [searchParams] = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -12,18 +12,16 @@ const Login = () => {
         // pass token which was received upon render
         // use token to create a new user w/ given email and password
             // if user already exists, return existing user
-    const handleSubmit = async (e, token) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const accessToken = token.access_token;
-            const refreshToken = token.refresh_token;
-            const expiresIn = token.expires_in;
+            const code = searchParams.get('code');
+            const state = searchParams.get('state');
 
             const userResponse = await axios.post('/api/music/login', {
-                accessToken,
-                refreshToken,
-                expiresIn,
+                code,
+                state,
                 email,
                 password,
             })
@@ -42,7 +40,7 @@ const Login = () => {
                     </h2>
                 </div>
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" onSubmit={(e) => handleSubmit(e, tokenData.data)}>
+                    <form className="space-y-6" onSubmit={(e) => handleSubmit(e)}>
                         <div>
                             <label htmlFor="email" className="block text-base font-semibold leading-6 text-brown3">
                                 Email address

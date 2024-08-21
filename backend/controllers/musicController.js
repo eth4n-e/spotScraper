@@ -7,6 +7,7 @@ const querystring = require('querystring');
 require('dotenv').config();
 const axios = require('axios');
 const { URLSearchParams } = require('url');
+const { access } = require('fs');
 
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
@@ -54,10 +55,12 @@ const redirectToSpotifyAuth = async (req, res) => {
 
 /***************************/
 /** ACCESS TOKEN EXCHANGE **/
-const exchangeCodeForToken = async (code) => {
-    try {
+const getAccessToken = async (code, state) => {
+    if (state === null || code === null) {
+      throw new Error({error: 'State mismatch'});
+    } else {
+      try {
         const tokenEndpoint = "https://accounts.spotify.com/api/token";
-    
         // fetch does not support form property (reason behind using body property)
         // data must be application/w-xxx-form-urlencoded
             // URLSearchParams helps accomplish this
@@ -75,27 +78,8 @@ const exchangeCodeForToken = async (code) => {
         });
 
         return await tokenResponse.json();
-    } catch(err) {
-        console.error('Error obtaining token:', err);
-        throw new Error('Failed to obtain Spotify access token');
-    }
-}
-
-const getAccessToken = async (req, res) => {
-    const code = req.body.code || null;
-    const state = req.body.state || null;
-  
-    if (state === null || code === null) {
-      res.status(500).json({error: 'State mismatch'});
-    } else {
-      try {
-          const tokenResponse = await exchangeCodeForToken(code);
-
-          return res.status(200).json(tokenResponse);
-          // to-do: create a mongoDB user upon successful tokenResponse
       } catch(err) {
-          console.error('Error in /api/music/home route: ', err);
-          res.status(500).json({ error: 'Failed to retrieve access token from Spotify' });
+        throw new Error({error: 'Failed to retrieve access token'})
       }
     }
 }
@@ -123,56 +107,120 @@ const getUserInfoSpotify = async (accessToken) => {
     }
 }
 
-// check if user already exists based on spotify user id
-// if so
-    // return existing user object
-// else 
-    // make request to spotify's getUserProfile api route
-        // fetch user name, email, user id
-    // instantiate a new User with data from spotify + access token + refresh token + expiration time
-    // return new User
-const createUser = async (req, res) => {
+// use information from the users profile, email, password, and token to create a user
+const createUser = async (token, profile, email, password) => {
     try {
-        const accessToken = req.body.accessToken;
-        // access user info via spotify api
-        const userResponse = await getUserInfoSpotify(accessToken);
-        // search for user based on their spotify id
-        const user = await User.findById(userResponse.id);
+        // extract information needed for a new user
+        const username = profile.display_name;
+        const id = profile.id;
+        const profilePic = profile.images[0].url || '../public/discoBall.png';
+        const accessToken = token.access_token;
+        const refreshToken = token.refresh_token;
+        const expiresIn = token.expires_in;
 
-        if(user) { // existing user
-            return res.status(200).json(user);
-        } else if (userResponse.email === req.body.email) { // create user if provided email matches one associated with their account
-            // extract important information
-            const userName = userResponse.display_name;
-            const userEmail = req.body.email;
-            const userPassword = req.body.password;
-            const userId = userResponse.id;
-            const userImg = userResponse.images[0].url || '../public/discoBall.png';
-            const refreshToken = req.body.refreshToken;
-            const expiresIn = req.body.expiresIn;
+        // insert user into db
+        const newUser = await User.create({
+            _id: id,
+            name: username, 
+            email: email,
+            password: password,
+            profilePic: profilePic,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            tokenExpiration: expiresIn,
+        });
 
-            const newUser = await User.create({
-                _id: userId,
-                name: userName, 
-                email: userEmail,
-                password: userPassword,
-                profilePic: userImg,
-                accessToken,
-                refreshToken,
-                tokenExpiration: expiresIn,
-            });
-
-            return res.status(200).json(newUser);
-        } else {
-            return res.status(401).json({error: 'User does not exist or provided email does not match email connected to spotify account'});
-        }
+        return newUser
     } catch(err) {
-        return res.status(400).json({error: 'Error in user creation process'});
+        throw new Error({error: 'Unable to create user'})
     }
-
 }
 /** USER RETRIEVAL & CREATION **/
 /*******************************/
+
+/***********/
+/** LOGIN **/
+const login = async (req, res) => {
+    /*
+    Handles:
+        - access token creation if the user has never been registered
+            - creates user in the database
+        - refreshes token if the user already exists
+    */
+    try {
+        const email = req.body.email;
+        const password = req.body.password;
+        const code = req.body.code;
+        const state = req.body.state;
+        // find user with the associated email entered
+            // multiple spotify accounts cannot be linked to the same exact email 
+        const user = await User.findOne({email: email}).exec();
+
+        // user has not yet been created
+        if(!user) {
+            // create access token
+            const tokenResponse = await getAccessToken(code, state);
+            const token = tokenResponse.data;
+            // fetch the user's profile info from spotify
+            const profile = await getUserInfoSpotify(token.accessToken);
+            
+            // insert user into db
+            const newUser = await createUser(token, profile, email, password);
+            console.log(newUser);
+
+            return res.status(200).json({user: newUser});
+        } else if(user && user.email == email && user.password == password) { // user exists, verify that email and password match the user's credentials
+            // refresh the user's token and update in the db
+            const updatedToken = await refreshToken(user.refreshToken);
+            user.accessToken = updatedToken.access_token;
+            user.refreshToken = updatedToken.refresh_token;
+            user.tokenExpiration = updatedToken.expires_in;
+            console.log(user);
+            // return the user
+            return res.status(200).json({user: user});
+        }
+    } catch(err) {
+        console.error(err);
+        res.status(400).json({error: err});
+    }
+}
+/** LOGIN **/
+/***********/
+
+/*******************/
+/** REFRESH TOKEN **/
+const refreshToken = async (refreshToken) => {
+    try {
+        const url = 'https://accounts.spotify.com/api/token';
+        // data necessary for refreshing token
+        const headers = new Headers({
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
+        });
+
+        const body = new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        });
+
+        // fetch token
+        const updatedToken = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: body
+        });
+
+        console.log(updatedToken);
+
+        return await updatedToken.json();
+    } catch (err) {
+        console.error(err);
+        throw new Error('Unable to refresh spotify token');
+    }
+}
+/** REFRESH TOKEN **/
+/*******************/
+
 
 // get all tracks
 // make request to spotify api to get top tracks for user
@@ -222,9 +270,9 @@ module.exports = {
     generateRandomString,
     redirectToSpotifyAuth,
     getAccessToken,
-    exchangeCodeForToken,
     getUserInfoSpotify,
     createUser,
+    login,
     getTracks,
     getTrack,
     createTrack
