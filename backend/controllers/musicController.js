@@ -10,47 +10,26 @@ const { URLSearchParams } = require('url');
 
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
-// const clientSecret = process.env.CLIENT_SECRET;
+const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'http://localhost:3000/login'; // url to redirect back to after authorization
 
 
-/** HELPER METHODS TO IMPLEMENT SPOTIFY AUTHORIZATION PKCE FLOW **/
+/** HELPER METHOD TO IMPLEMENT SPOTIFY AUTHORIZATION FLOW **/
 // method to generate a code verifier (high-entropy cryptographic string)
 const generateRandomString = (length) => {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
     return values.reduce((acc, x) => acc + possible[x % possible.length], "");
 }
-
-// method to hash the code verifier
-// returns a digest based on the SHA256 algorithm
-const sha256 = async (plain) => {
-    const encoder = new TextEncoder()
-    const data = encoder.encode(plain)
-    return crypto.subtle.digest('SHA-256', data)
-}
-
-// method to return base64 representation of digest created by sha256 method
-const base64encode = (input) => {
-    return btoa(String.fromCharCode(...new Uint8Array(input)))
-      .replace(/=/g, '')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_');
-}  
-/** HELPER METHODS TO IMPLEMENT SPOTIFY AUTHORIZATION PKCE FLOW **/
+/** HELPER METHOD TO IMPLEMENT SPOTIFY AUTHORIZATION FLOW **/
 
 /*******************/
 /** AUTHORIZATION **/
 const redirectToSpotifyAuth = async (req, res) => {
     // protection against attacks
-    const state = req.body.state;
+    const state = generateRandomString(16);
     // spotify functionality we want to access
     const scopes = 'user-read-private user-read-email playlist-modify-private playlist-modify-public playlist-read-collaborative user-top-read user-library-modify user-library-read';
-
-    // receive code verifier for use in PKCE flow
-    const codeVerifier = req.body.code_verifier;
-    const hashedVerifier = await sha256(codeVerifier);
-    const codeChallenge = base64encode(hashedVerifier);
 
     // pass the authorization url to the frontend
     // frontend handles redirect to spotify's authorization page
@@ -60,10 +39,7 @@ const redirectToSpotifyAuth = async (req, res) => {
             client_id: clientId,
             scope: scopes,
             redirect_uri: redirectUri,
-            code_challenge_method: 'S256',
-            code_challenge: codeChallenge,
             state: state,
-            show_dialog: true
         });
 
         const authorize_url = `https://accounts.spotify.com/authorize?${queryParams}`;
@@ -78,21 +54,23 @@ const redirectToSpotifyAuth = async (req, res) => {
 
 /***************************/
 /** ACCESS TOKEN EXCHANGE **/
-const exchangeCodeForToken = async (code, codeVerifier) => {
+const exchangeCodeForToken = async (code) => {
     try {
         const tokenEndpoint = "https://accounts.spotify.com/api/token";
     
+        // fetch does not support form property (reason behind using body property)
+        // data must be application/w-xxx-form-urlencoded
+            // URLSearchParams helps accomplish this
         const tokenResponse = await fetch(tokenEndpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
             },
             body: new URLSearchParams({
-                client_id: clientId,
                 grant_type: 'authorization_code',
                 code: code,
                 redirect_uri: redirectUri,
-                code_verifier: codeVerifier,
             }),
         });
 
@@ -104,8 +82,6 @@ const exchangeCodeForToken = async (code, codeVerifier) => {
 }
 
 const getAccessToken = async (req, res) => {
-    const codeVerifier = req.body.code_verifier;
-
     const code = req.body.code || null;
     const state = req.body.state || null;
   
@@ -113,7 +89,7 @@ const getAccessToken = async (req, res) => {
       res.status(500).json({error: 'State mismatch'});
     } else {
       try {
-          const tokenResponse = await exchangeCodeForToken(code, codeVerifier);
+          const tokenResponse = await exchangeCodeForToken(code);
 
           return res.status(200).json(tokenResponse);
           // to-do: create a mongoDB user upon successful tokenResponse

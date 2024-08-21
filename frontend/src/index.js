@@ -22,17 +22,14 @@ const loginLoader = async () => {
   const spotState = urlParams.get('state');
 
   try {
-      const codeVerifier = window.localStorage.getItem('code_verifier');
       // make request to backend controller which handles token exchange
       const tokenResponse = await axios.post('/api/music/getToken', {
-          code_verifier: codeVerifier,
           code: spotCode,
           state: spotState,
       });
 
       // axios automatically parses the response to a JSON object (unlike fetch)
       return tokenResponse;
-
   } catch (err) {
       console.error(err);
       // Authorization was denied, redirect back to authorize page
