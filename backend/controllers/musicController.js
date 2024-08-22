@@ -41,6 +41,7 @@ const redirectToSpotifyAuth = async (req, res) => {
             scope: scopes,
             redirect_uri: redirectUri,
             state: state,
+            show_dialog: true,
         });
 
         const authorize_url = `https://accounts.spotify.com/authorize?${queryParams}`;
@@ -148,6 +149,7 @@ const login = async (req, res) => {
         - refreshes token if the user already exists
     */
     try {
+        console.log('In try block');
         const email = req.body.email;
         const password = req.body.password;
         const code = req.body.code;
@@ -159,23 +161,24 @@ const login = async (req, res) => {
         // user has not yet been created
         if(!user) {
             // create access token
-            const tokenResponse = await getAccessToken(code, state);
-            const token = tokenResponse.data;
+            const token = await getAccessToken(code, state);
             // fetch the user's profile info from spotify
-            const profile = await getUserInfoSpotify(token.accessToken);
+            const profile = await getUserInfoSpotify(token.access_token);
             
             // insert user into db
             const newUser = await createUser(token, profile, email, password);
-            console.log(newUser);
+            console.log('New User:', newUser);
 
             return res.status(200).json({user: newUser});
         } else if(user && user.email == email && user.password == password) { // user exists, verify that email and password match the user's credentials
             // refresh the user's token and update in the db
             const updatedToken = await refreshToken(user.refreshToken);
-            user.accessToken = updatedToken.access_token;
-            user.refreshToken = updatedToken.refresh_token;
-            user.tokenExpiration = updatedToken.expires_in;
-            console.log(user);
+            if(updatedToken) { // only update user if new token is returned
+                user.accessToken = updatedToken.access_token;
+                // refresh token is not guarenteed to be updated, continue using existing one in such instances
+                user.refreshToken = updatedToken.refresh_token || user.refreshToken;
+                user.tokenExpiration = updatedToken.expires_in;
+            }
             // return the user
             return res.status(200).json({user: user});
         }
@@ -209,8 +212,6 @@ const refreshToken = async (refreshToken) => {
             headers: headers,
             body: body
         });
-
-        console.log(updatedToken);
 
         return await updatedToken.json();
     } catch (err) {
@@ -273,6 +274,7 @@ module.exports = {
     getUserInfoSpotify,
     createUser,
     login,
+    refreshToken,
     getTracks,
     getTrack,
     createTrack

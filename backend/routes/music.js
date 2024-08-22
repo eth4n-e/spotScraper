@@ -8,6 +8,7 @@ const {
     getUserInfoSpotify,
     createUser,
     login,
+    refreshToken,
     getTracks, 
     getTrack,
     createTrack,
@@ -17,7 +18,7 @@ const {
 const router = express.Router();
 
 // configure route to be associated with particular controllers
-router.post('/login', login, createUser, getAccessToken, getUserInfoSpotify);
+router.post('/login', login, createUser, getAccessToken, getUserInfoSpotify, refreshToken);
 
 router.post('/auth', redirectToSpotifyAuth);
 
