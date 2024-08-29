@@ -149,7 +149,6 @@ const login = async (req, res) => {
         - refreshes token if the user already exists
     */
     try {
-        console.log('In try block');
         const email = req.body.email;
         const password = req.body.password;
         const code = req.body.code;
@@ -167,7 +166,6 @@ const login = async (req, res) => {
             
             // insert user into db
             const newUser = await createUser(token, profile, email, password);
-            console.log('New User:', newUser);
 
             return res.status(200).json({user: newUser});
         } else if(user && user.email == email && user.password == password) { // user exists, verify that email and password match the user's credentials
@@ -179,7 +177,7 @@ const login = async (req, res) => {
                 user.refreshToken = updatedToken.refresh_token || user.refreshToken;
                 user.tokenExpiration = updatedToken.expires_in;
             }
-            // return the user
+
             return res.status(200).json({user: user});
         }
     } catch(err) {

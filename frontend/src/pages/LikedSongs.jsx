@@ -18,10 +18,13 @@ import axios from 'axios';
 const LikedSongs = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const user = location.state?.user;
+    // fetch user data based on state passed by login
+    console.log('Location.state:', location.state);
+    const user = location.state?.user.user;
 
     return (
         <div>
+            <Navbar user={user} profilePic={user.profilePic}/>
             <h1>Home Page</h1>
         </div>
     )
