@@ -17,34 +17,15 @@ const Auth = () => {
 
     const handleAuth = async (e) => {
             e.preventDefault();
-            console.log('In Authentication handler');
-            // to receive from callback:
-                // access_token
-                // token_type
-                // scope
-                // expires_in
-                // refresh_token
-            // maybe make a separate model for tokens
-                // User can have a token document
-            // from response make a post request to update user information
+          
             try {
-                const state = generateRandomString(16);
-                const codeVerifier = generateRandomString(64);
-
-                // saving in localStorage prior to creating a new user
-                // wanted to prevent frequent user creation and deletion
-                window.localStorage.setItem('code_verifier', codeVerifier);
-
-                const response = await axios.post('/api/music/auth', {
-                    state, 
-                    code_verifier: codeVerifier,
-                }, { headers: {
+                // make request to server to receive back the spotify authorization url
+                const response = await axios.post('/api/music/auth', { 
+                    headers: {
                         'Access-Control-Allow-Origin': 'http://localhost:3000/',
                     }
                 });
-                console.log(response);
                 const authorize_url = response.data.auth_data;
-                console.log(`Authorization URL received from backend ${authorize_url}`);
                 window.location.href = authorize_url; 
             } catch(err) {
                 console.log(err);

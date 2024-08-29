@@ -18,9 +18,7 @@ import axios from 'axios';
 const LikedSongs = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const user = location.user;
-
-    console.log(user);
+    const user = location.state?.user;
 
     return (
         <div>
