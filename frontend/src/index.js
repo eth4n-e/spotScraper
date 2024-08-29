@@ -4,38 +4,18 @@ import {
   redirect, 
   createRoutesFromElements,
   Route} from 'react-router-dom'
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import axios from 'axios';
 
-// pages & components
+// pages, components & context
+import userContext from './userContext';
 import Auth from './pages/Auth';
 import LikedSongs from './pages/LikedSongs';
 import Login from './pages/Login';
 import TopTracks from './pages/TopTracks';
 import Playlists from './pages/Playlists';
-
-// const loginLoader = async () => {
-//   const urlParams = new URLSearchParams(window.location.search);
-//   const spotCode = urlParams.get('code');
-//   const spotState = urlParams.get('state');
-
-//   try {
-//       // make request to backend controller which handles token exchange
-//       const tokenResponse = await axios.post('/api/music/getToken', {
-//           code: spotCode,
-//           state: spotState,
-//       });
-
-//       // axios automatically parses the response to a JSON object (unlike fetch)
-//       return tokenResponse;
-//   } catch (err) {
-//       console.error(err);
-//       // Authorization was denied, redirect back to authorize page
-//       return redirect('/');
-//   }
-// }
 
 const router = createBrowserRouter([
   {
@@ -70,11 +50,19 @@ const router = createBrowserRouter([
   }
 ])
 
+const App = () => {
+  const [user, setUser] = useState(null);
+
+  return (
+    <userContext.Provider value={{ user, setUser }}>
+      <RouterProvider router={router} />
+    </userContext.Provider>
+  )
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <App />
   </React.StrictMode>
 );
-
-// export default App;

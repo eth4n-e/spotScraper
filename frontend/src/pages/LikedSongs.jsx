@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useLoaderData, useLocation } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import axios from 'axios';
-//  import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import userContext from '../userContext'
 
 
 /*
@@ -19,8 +19,13 @@ const LikedSongs = () => {
     const location = useLocation();
     const navigate = useNavigate();
     // fetch user data based on state passed by login
-    console.log('Location.state:', location.state);
-    const user = location.state?.user.user;
+    const { user, setUser } = useContext(userContext);
+
+    useEffect(() => {
+        if(!user) {
+            setUser(location.state.user.user);
+        }
+    })
 
     return (
         <div>
