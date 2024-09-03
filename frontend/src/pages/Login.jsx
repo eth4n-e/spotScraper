@@ -26,7 +26,7 @@ const Login = () => {
                 password,
             })
 
-            navigate('/likedsongs', { state: {user: userResponse.data } })
+            navigate('/likedsongs')
         } catch (err) {
             console.log(err);
         }

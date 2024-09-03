@@ -37,6 +37,17 @@ import Playlists from './pages/Playlists';
 //   }
 // }
 
+const likedLoader = async () => {
+  try {
+    const userSession = await axios.get('/api/music/user');
+
+    return userSession
+  } catch (err) {
+    console.error(err);
+    return redirect('/login');
+  }
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -57,8 +68,7 @@ const router = createBrowserRouter([
   {
     path: "/likedsongs",
     element: <LikedSongs/>,
-    // loader: homeDataLoader,
-    // shouldRevalidate
+    loader: likedLoader
   },
   {
     path:'/toptracks',

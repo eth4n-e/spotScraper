@@ -136,6 +136,16 @@ const createUser = async (token, profile, email, password) => {
         throw new Error({error: 'Unable to create user'})
     }
 }
+
+const getUser = (req, res) => {
+    if(!req.session.user) {
+        return res.status(401).json({message: 'Unauthorized'})
+    }
+
+    return res.status(200).json({
+        user: req.session.user
+    })
+}
 /** USER RETRIEVAL & CREATION **/
 /*******************************/
 
@@ -149,14 +159,13 @@ const login = async (req, res) => {
         - refreshes token if the user already exists
     */
     try {
-        console.log('In try block');
         const email = req.body.email;
         const password = req.body.password;
         const code = req.body.code;
         const state = req.body.state;
         // find user with the associated email entered
             // multiple spotify accounts cannot be linked to the same exact email 
-        const user = await User.findOne({email: email}).exec();
+        let user = await User.findOne({email: email}).exec();
 
         // user has not yet been created
         if(!user) {
@@ -166,10 +175,7 @@ const login = async (req, res) => {
             const profile = await getUserInfoSpotify(token.access_token);
             
             // insert user into db
-            const newUser = await createUser(token, profile, email, password);
-            console.log('New User:', newUser);
-
-            return res.status(200).json({user: newUser});
+            user = await createUser(token, profile, email, password);
         } else if(user && user.email == email && user.password == password) { // user exists, verify that email and password match the user's credentials
             // refresh the user's token and update in the db
             const updatedToken = await refreshToken(user.refreshToken);
@@ -179,9 +185,16 @@ const login = async (req, res) => {
                 user.refreshToken = updatedToken.refresh_token || user.refreshToken;
                 user.tokenExpiration = updatedToken.expires_in;
             }
-            // return the user
-            return res.status(200).json({user: user});
         }
+        // store important information in the user's session
+        req.session.user = {
+            id: user._id,
+            email: user.email,
+            accessToken: user.accessToken,
+            refreshToken: user.refreshToken
+        }
+
+        return res.status(200).json({user: user});
     } catch(err) {
         console.error(err);
         res.status(400).json({error: err});
@@ -273,6 +286,7 @@ module.exports = {
     getAccessToken,
     getUserInfoSpotify,
     createUser,
+    getUser,
     login,
     refreshToken,
     getTracks,
