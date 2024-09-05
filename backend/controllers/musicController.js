@@ -87,8 +87,8 @@ const getAccessToken = async (code, state) => {
 /** ACCESS TOKEN EXCHANGE **/
 /***************************/
 
-/*******************************/
-/** USER RETRIEVAL & CREATION **/
+/****************************************/
+/** USER RETRIEVAL + CREATION + UPDATE **/
 const getUserInfoSpotify = async (accessToken) => {
     // use spotify's get current user profile API route to retrieve user name and email associated with user
     try {
@@ -137,7 +137,7 @@ const createUser = async (token, profile, email, password) => {
     }
 }
 
-const getUser = (req, res) => {
+const getUserSession = (req, res) => {
     if(!req.session.user) {
         return res.status(401).json({message: 'Unauthorized'})
     }
@@ -146,8 +146,38 @@ const getUser = (req, res) => {
         user: req.session.user
     })
 }
-/** USER RETRIEVAL & CREATION **/
-/*******************************/
+
+const updateUser = async (req, res) => {
+    try {
+        // current session's user passed in body of request
+        const user = req.body.user;
+
+        // request new token
+        const updatedToken = await refreshToken(user.refreshToken);
+
+        const userDB = await User.findById({id: user.id}).exec();
+
+        // user or null
+        if(updatedToken) {
+            if(userDB) { // update data for user in database
+                userDB.accessToken = updatedToken.access_token;
+                userDB.refreshToken = updatedToken.refresh_token || userDB.refreshToken;
+                userDB.tokenExpiration = updatedToken.expires_in;
+            } else { // update data for user in current session
+                user.accessToken = updatedToken.accessToken;
+                user.refreshToken = updatedToken.refresh_token || user.refreshToken;
+
+                req.session.user = user;
+            }
+        }
+
+        return res.status(200);
+    } catch (err) {
+        return res.status(400).json({error: 'Unable to update user data'});
+    }
+}
+/** USER RETRIEVAL + CREATION + UPDATE **/
+/****************************************/
 
 /***********/
 /** LOGIN **/
@@ -179,9 +209,10 @@ const login = async (req, res) => {
         } else if(user && user.email == email && user.password == password) { // user exists, verify that email and password match the user's credentials
             // refresh the user's token and update in the db
             const updatedToken = await refreshToken(user.refreshToken);
-            if(updatedToken) { // only update user if new token is returned
+
+            if(updatedToken) {
                 user.accessToken = updatedToken.access_token;
-                // refresh token is not guarenteed to be updated, continue using existing one in such instances
+                // refresh tokens are not always generated, in these instances default to the user's existing refreshToken
                 user.refreshToken = updatedToken.refresh_token || user.refreshToken;
                 user.tokenExpiration = updatedToken.expires_in;
             }
@@ -235,7 +266,6 @@ const refreshToken = async (refreshToken) => {
 /** REFRESH TOKEN **/
 /*******************/
 
-
 // get all tracks
 // make request to spotify api to get top tracks for user
 const getTracks = async(req, res) => {
@@ -286,7 +316,8 @@ module.exports = {
     getAccessToken,
     getUserInfoSpotify,
     createUser,
-    getUser,
+    getUserSession,
+    updateUser,
     login,
     refreshToken,
     getTracks,

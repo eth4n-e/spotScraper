@@ -39,7 +39,7 @@ import Playlists from './pages/Playlists';
 
 const likedLoader = async () => {
   try {
-    const userSession = await axios.get('/api/music/user');
+    const userSession = await axios.get('/api/music/getUser');
 
     return userSession
   } catch (err) {
