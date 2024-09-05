@@ -24,6 +24,20 @@ const generateRandomString = (length) => {
 }
 /** HELPER METHOD TO IMPLEMENT SPOTIFY AUTHORIZATION FLOW **/
 
+/*************************************************************/
+/** HELPER METHOD TO CHECK REFRESH TOKEN AND UPDATE DB USER */
+const updateTokenDB = async (userDB, token) => {
+    userDB.accessToken = token.access_token;
+    // refresh tokens are not always generated, in these instances default to the user's existing refreshToken
+    userDB.refreshToken = token.refresh_token || userDB.refreshToken;
+    userDB.tokenExpiration = token.expires_in;
+
+    // save updates to document in db
+    await userDB.save();
+}
+/** HELPER METHOD TO CHECK REFRESH TOKEN AND UPDATE DB USER */
+/*************************************************************/
+
 /*******************/
 /** AUTHORIZATION **/
 const redirectToSpotifyAuth = async (req, res) => {
@@ -150,30 +164,32 @@ const getUserSession = (req, res) => {
 const updateUser = async (req, res) => {
     try {
         // current session's user passed in body of request
-        const user = req.body.user;
+        const user = req.body.user.data.user;
 
         // request new token
         const updatedToken = await refreshToken(user.refreshToken);
-
-        const userDB = await User.findById({id: user.id}).exec();
+        
+        const userDB = await User.findById({_id: user.id}).exec();
 
         // user or null
         if(updatedToken) {
-            if(userDB) { // update data for user in database
-                userDB.accessToken = updatedToken.access_token;
-                userDB.refreshToken = updatedToken.refresh_token || userDB.refreshToken;
-                userDB.tokenExpiration = updatedToken.expires_in;
-            } else { // update data for user in current session
-                user.accessToken = updatedToken.accessToken;
-                user.refreshToken = updatedToken.refresh_token || user.refreshToken;
-
-                req.session.user = user;
+            if(userDB) { // update data for user in database if exists
+                updateTokenDB(userDB, updatedToken);
+            } 
+            // always want to update session data on user
+            req.session.user = {
+                id: user.id,
+                email: user.email,
+                accessToken: updatedToken.access_token,
+                refreshToken: updatedToken.refresh_token || user.refreshToken
             }
+
         }
 
-        return res.status(200);
+        return res.status(200).json({user: req.session.user});
     } catch (err) {
-        return res.status(400).json({error: 'Unable to update user data'});
+        console.log(err);
+        return res.status(400).json({error: 'Unable to update user'});
     }
 }
 /** USER RETRIEVAL + CREATION + UPDATE **/
@@ -211,10 +227,7 @@ const login = async (req, res) => {
             const updatedToken = await refreshToken(user.refreshToken);
 
             if(updatedToken) {
-                user.accessToken = updatedToken.access_token;
-                // refresh tokens are not always generated, in these instances default to the user's existing refreshToken
-                user.refreshToken = updatedToken.refresh_token || user.refreshToken;
-                user.tokenExpiration = updatedToken.expires_in;
+                updateTokenDB(user, updatedToken);
             }
         }
         // store important information in the user's session

@@ -41,7 +41,13 @@ const likedLoader = async () => {
   try {
     const userSession = await axios.get('/api/music/getUser');
 
-    return userSession
+    const res = await axios.put('/api/music/updateUser', {
+      user: userSession
+    });
+
+    const updatedUser = await axios.get('/api/music/getUser');
+
+    return updatedUser;
   } catch (err) {
     console.error(err);
     return redirect('/login');

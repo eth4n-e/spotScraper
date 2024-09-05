@@ -20,13 +20,13 @@ const {
 const router = express.Router();
 
 // configure route to be associated with particular controllers
-router.post('/login', login, createUser, getAccessToken, getUserInfoSpotify, refreshToken);
+router.post('/login', login);
 
 router.post('/auth', redirectToSpotifyAuth);
 
 router.get('/getUser', getUserSession);
 
-router.put('/updateUser', updateUser, getUserSession, refreshToken)
+router.put('/updateUser', updateUser)
 
 // export router for use in server.js
 module.exports = router;
