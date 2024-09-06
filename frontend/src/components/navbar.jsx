@@ -1,13 +1,16 @@
 // link will be used for page navigation
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 // return navbar template
 // remember curly braces inside parentheses, destructing, reading data contained within the object
 const Navbar = ({ profilePic }) => {
+    // using location to handle knowing which page we are currently on
+        // compare the path to the href
+    const location = useLocation();
 
     const navigation = [
-        {name: 'Liked Songs', href:'#', current: true },
-        {name: 'Top Tracks', href:'/toptracks', current: false},
-        {name: 'Playlists', href:'/playlists', current: false}
+        {name: 'Liked Songs', href:'/likedsongs'},
+        {name: 'Top Tracks', href:'/toptracks'},
+        {name: 'Playlists', href:'/playlists'}
     ]
 
     return (
@@ -18,14 +21,14 @@ const Navbar = ({ profilePic }) => {
                         <div>
                             <div className="flex space-x-6 md:-ml-4">
                                 {navigation.map( (item) => (
-                                    <a 
-                                        href={item.href}
+                                    <Link 
+                                        to={item.href}
                                         key={item.name}
-                                        aria-current={ item.current ? 'page' : undefined }
-                                        className={ `${item.current ? 'bg-beige text-brown2 shadow-2xl' : 'text-beige hover:bg-brown2 hover:text-beige hover:shadow-2xl'} rounded-md px-3 py-2 text-sm font-medium`}
+                                        aria-current={ location.pathname === item.href ? 'page' : undefined }
+                                        className={ `${location.pathname === item.href ? 'bg-beige text-brown2 shadow-2xl' : 'text-beige hover:bg-brown2 hover:text-beige hover:shadow-2xl'} rounded-md px-3 py-2 text-sm font-medium`}
                                     >
                                         {item.name}
-                                    </a>
+                                    </Link>
                                 ))}
                             </div>
                         </div>

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useLoaderData, useLocation } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import axios from 'axios';
-//  import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import userContext from '../userContext'
 
 
 /*
@@ -17,13 +17,12 @@ import axios from 'axios';
 */
 const LikedSongs = () => {
     const userRender = useLoaderData();
-    const [user, setUser] = useState(userRender.data.user);
+    const user = userRender.data.user;
     const navigate = useNavigate();
-
-    console.log(user);
 
     return (
         <div>
+            <Navbar profilePic={user.profilePic}/>
             <h1>Home Page</h1>
             <p>{user.email}</p>
         </div>

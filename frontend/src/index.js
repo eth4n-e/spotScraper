@@ -4,50 +4,38 @@ import {
   redirect, 
   createRoutesFromElements,
   Route} from 'react-router-dom'
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import axios from 'axios';
 
-// pages & components
+// pages, components & context
+import userContext from './userContext';
 import Auth from './pages/Auth';
 import LikedSongs from './pages/LikedSongs';
 import Login from './pages/Login';
 import TopTracks from './pages/TopTracks';
 import Playlists from './pages/Playlists';
 
-// const loginLoader = async () => {
-//   const urlParams = new URLSearchParams(window.location.search);
-//   const spotCode = urlParams.get('code');
-//   const spotState = urlParams.get('state');
-
-//   try {
-//       // make request to backend controller which handles token exchange
-//       const tokenResponse = await axios.post('/api/music/getToken', {
-//           code: spotCode,
-//           state: spotState,
-//       });
-
-//       // axios automatically parses the response to a JSON object (unlike fetch)
-//       return tokenResponse;
-//   } catch (err) {
-//       console.error(err);
-//       // Authorization was denied, redirect back to authorize page
-//       return redirect('/');
-//   }
-// }
-
-const likedLoader = async () => {
+// loader to update user's token and pass the user to respective component
+// first fetches user
+  // passes user into update function
+    // update func returns updated user
+const userLoader = async () => {
   try {
-    const userSession = await axios.get('/api/music/getUser');
+    // retrieve user's information stored in session
+    let user = await axios.get('/api/music/getUser');
+    
+    // access token has expired
+    if(Date.now() >= user.tokenExpiration) {
+      // update the user's tokens
+      // placing expiration check here prevents updateUser from being called every render
+      user = await axios.put('/api/music/updateUser', {
+        user: user
+      })
+    }
 
-    const res = await axios.put('/api/music/updateUser', {
-      user: userSession
-    });
-
-    const updatedUser = await axios.get('/api/music/getUser');
-
-    return updatedUser;
+    return user;
   } catch (err) {
     console.error(err);
     return redirect('/login');
@@ -74,23 +62,33 @@ const router = createBrowserRouter([
   {
     path: "/likedsongs",
     element: <LikedSongs/>,
-    loader: likedLoader
+    loader: userLoader
   },
   {
     path:'/toptracks',
     element: <TopTracks/>,
+    loader: userLoader
   },
   {
     path:'/playlists',
     element: <Playlists/>,
+    loader: userLoader
   }
 ])
+
+const App = () => {
+  const [user, setUser] = useState(null);
+
+  return (
+    <userContext.Provider value={{ user, setUser }}>
+      <RouterProvider router={router} />
+    </userContext.Provider>
+  )
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <App />
   </React.StrictMode>
 );
-
-// export default App;
