@@ -1,13 +1,13 @@
 import Navbar from '../components/navbar'
-import { useLocation } from 'react-router-dom'
+import { useLoaderData } from 'react-router-dom'
 
 const Playlists = () => {
-    const location = useLocation();
-    const user = location.state?.user;
+    const userRender = useLoaderData();
+    const user = userRender.data.user;
 
     return (
         <div>
-            <Navbar profilePic={user.profilePic} user={user}/>
+            <Navbar profilePic={user.profilePic}/>
             <p>Playlists</p>
         </div>
     )

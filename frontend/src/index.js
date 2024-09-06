@@ -17,15 +17,17 @@ import Login from './pages/Login';
 import TopTracks from './pages/TopTracks';
 import Playlists from './pages/Playlists';
 
-const likedLoader = async () => {
+// loader to update user's token and pass the user to respective component
+// first fetches user
+  // passes user into update function
+    // update func returns updated user
+const userLoader = async () => {
   try {
     const userSession = await axios.get('/api/music/getUser');
 
-    const res = await axios.put('/api/music/updateUser', {
+    const updatedUser = await axios.put('/api/music/updateUser', {
       user: userSession
     });
-
-    const updatedUser = await axios.get('/api/music/getUser');
 
     return updatedUser;
   } catch (err) {
@@ -54,15 +56,17 @@ const router = createBrowserRouter([
   {
     path: "/likedsongs",
     element: <LikedSongs/>,
-    loader: likedLoader
+    loader: userLoader
   },
   {
     path:'/toptracks',
     element: <TopTracks/>,
+    loader: userLoader
   },
   {
     path:'/playlists',
     element: <Playlists/>,
+    loader: userLoader
   }
 ])
 

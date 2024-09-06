@@ -1,9 +1,13 @@
 import Navbar from "../components/navbar"
+import { useLoaderData } from "react-router-dom"
 
 const TopTracks = () => {
+    const userRender = useLoaderData();
+    const user = userRender.data.user;
+
     return (
         <div>
-            <Navbar/>
+            <Navbar profilePic={user.profilePic}/>
             <p>Top Tracks Page</p>
         </div>
     )

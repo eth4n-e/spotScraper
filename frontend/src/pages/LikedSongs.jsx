@@ -17,14 +17,12 @@ import userContext from '../userContext'
 */
 const LikedSongs = () => {
     const userRender = useLoaderData();
-    const [user, setUser] = useState(userRender.data.user);
+    const user = userRender.data.user;
     const navigate = useNavigate();
-
-    console.log(user);
 
     return (
         <div>
-            <Navbar user={user} profilePic={user.profilePic}/>
+            <Navbar profilePic={user.profilePic}/>
             <h1>Home Page</h1>
             <p>{user.email}</p>
         </div>
