@@ -23,13 +23,19 @@ import Playlists from './pages/Playlists';
     // update func returns updated user
 const userLoader = async () => {
   try {
-    const userSession = await axios.get('/api/music/getUser');
+    // retrieve user's information stored in session
+    let user = await axios.get('/api/music/getUser');
+    
+    // access token has expired
+    if(Date.now() >= user.tokenExpiration) {
+      // update the user's tokens
+      // placing expiration check here prevents updateUser from being called every render
+      user = await axios.put('/api/music/updateUser', {
+        user: user
+      })
+    }
 
-    const updatedUser = await axios.put('/api/music/updateUser', {
-      user: userSession
-    });
-
-    return updatedUser;
+    return user;
   } catch (err) {
     console.error(err);
     return redirect('/login');

@@ -30,7 +30,9 @@ const updateTokenDB = async (userDB, token) => {
     userDB.accessToken = token.access_token;
     // refresh tokens are not always generated, in these instances default to the user's existing refreshToken
     userDB.refreshToken = token.refresh_token || userDB.refreshToken;
-    userDB.tokenExpiration = token.expires_in;
+    // additions to Date.now() are in milliseconds
+    // tokens last for 1 hour (3600 seconds or 3600 * 1000 milliseconds)
+    userDB.tokenExpiration = Date.now() + token.expires_in * 1000;
 
     // save updates to document in db
     await userDB.save();
@@ -142,7 +144,7 @@ const createUser = async (token, profile, email, password) => {
             profilePic: profilePic,
             accessToken: accessToken,
             refreshToken: refreshToken,
-            tokenExpiration: expiresIn,
+            tokenExpiration: Date.now() + expiresIn * 1000,
         });
 
         return newUser
@@ -166,21 +168,25 @@ const updateUser = async (req, res) => {
         // current session's user passed in body of request
         const user = req.body.user.data.user;
 
-        // request new token
-        const updatedToken = await refreshToken(user.refreshToken);
-        
+        // find associated user in db
         const userDB = await User.findById({_id: user._id}).exec();
 
-        // user or null
-        if(updatedToken) {
-            if(userDB) { // update data for user in database if exists
-                updateTokenDB(userDB, updatedToken);
-            } 
-            // always want to update session data on user
-            req.session.user = userDB
+        // check if user exists
+        if(userDB) {
+            // request new token
+            const updatedToken = await refreshToken(user.refreshToken);
 
+            // check if token exists
+            if(updatedToken) {
+                // update user's tokens
+                updateTokenDB(userDB, updatedToken);
+                // update session information if updates to user occur
+                req.session.user = userDB
+            }
         }
 
+        // if no updates occur, req.session.user will correspond to the user set from login
+        // updates are only necessary if token expiration occurs
         return res.status(200).json({user: req.session.user});
     } catch (err) {
         console.log(err);
@@ -221,7 +227,7 @@ const login = async (req, res) => {
             // refresh the user's token and update in the db
             const updatedToken = await refreshToken(user.refreshToken);
 
-            if(updatedToken) {
+            if(updatedToken) { // if new token received update the user's document
                 updateTokenDB(user, updatedToken);
             }
         }
