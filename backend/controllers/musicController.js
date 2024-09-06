@@ -169,7 +169,7 @@ const updateUser = async (req, res) => {
         // request new token
         const updatedToken = await refreshToken(user.refreshToken);
         
-        const userDB = await User.findById({_id: user.id}).exec();
+        const userDB = await User.findById({_id: user._id}).exec();
 
         // user or null
         if(updatedToken) {
@@ -177,12 +177,7 @@ const updateUser = async (req, res) => {
                 updateTokenDB(userDB, updatedToken);
             } 
             // always want to update session data on user
-            req.session.user = {
-                id: user.id,
-                email: user.email,
-                accessToken: updatedToken.access_token,
-                refreshToken: updatedToken.refresh_token || user.refreshToken
-            }
+            req.session.user = userDB
 
         }
 
@@ -231,12 +226,7 @@ const login = async (req, res) => {
             }
         }
         // store important information in the user's session
-        req.session.user = {
-            id: user._id,
-            email: user.email,
-            accessToken: user.accessToken,
-            refreshToken: user.refreshToken
-        }
+        req.session.user = user;
 
         return res.status(200).json({user: user});
     } catch(err) {
