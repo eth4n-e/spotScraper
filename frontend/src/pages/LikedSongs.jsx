@@ -16,13 +16,16 @@ import axios from 'axios';
         - use context to manage data / state across several components
 */
 const LikedSongs = () => {
-    const location = useLocation();
+    const userRender = useLoaderData();
+    const [user, setUser] = useState(userRender.data.user);
     const navigate = useNavigate();
-    const user = location.state?.user;
+
+    console.log(user);
 
     return (
         <div>
             <h1>Home Page</h1>
+            <p>{user.email}</p>
         </div>
     )
 
