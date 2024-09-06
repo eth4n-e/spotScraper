@@ -166,6 +166,7 @@ const getUserSession = (req, res) => {
 const updateUser = async (req, res) => {
     try {
         // current session's user passed in body of request
+        console.log('request body', req.body);
         const user = req.body.user.data.user;
 
         // find associated user in db
@@ -275,6 +276,53 @@ const refreshToken = async (refreshToken) => {
 /** REFRESH TOKEN **/
 /*******************/
 
+/*********************/
+/** FETCH PLAYLISTS **/
+const fetchPlaylists = async (req, res) => {
+    const user = req.body.user;
+
+    try {
+        let playlistEndpoint = `https://api.spotify.com/v1/users/${user._id}/playlists`;
+
+        const playlistResponse = await fetch(playlistEndpoint, {
+            method: 'GET',
+            Authorization: 'Bearer ' + user.accessToken
+        });
+
+        const playlistData = await playlistResponse.json();
+
+        return res.status(200).json({playlists: playlistData});
+
+        // template once we begin to implement pagination
+        // while(trackEndpoint) {
+        //     // make request to spotify's tracks endpoint
+        //     const trackResponse = await fetch(trackEndpoint, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Authorization': `Bearer ${token}`
+
+        //         }
+        //     });
+
+        //     // parse response to JS object
+        //     const trackData = await trackResponse.json();
+          
+        //     // update endpoint to continue fetching liked songs
+        //     trackEndpoint = trackData.data.next;
+
+        //     // add the tracks to our array
+        //     tracks.concat(trackData.data.items);
+        // }
+        // return tracks;
+    }  catch (err) {
+        console.log(err);
+        res.status(401).json({error: "Unable to fetch user's playlists"});
+    }
+}
+
+/** FETCH PLAYLISTS **/
+/*********************/
+
 // get all tracks
 // make request to spotify api to get top tracks for user
 const getTracks = async(req, res) => {
@@ -329,6 +377,7 @@ module.exports = {
     updateUser,
     login,
     refreshToken,
+    fetchPlaylists,
     getTracks,
     getTrack,
     createTrack

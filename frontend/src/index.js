@@ -19,7 +19,9 @@ import Playlists from './pages/Playlists';
 const userLoader = async () => {
   try {
     // retrieve user's information stored in session
-    let user = await axios.get('/api/music/getUser');
+    const userSession = await axios.get('/api/music/getUser');
+
+    let user = userSession.data.user;
     
     // access token has expired
     if(Date.now() >= user.tokenExpiration) {
