@@ -83,7 +83,7 @@ const Login = () => {
                         <div className="mt-6">
                             <button
                                 type="submit"
-                                className="flex w-full mt-10 justify-center rounded-md bg-brown3 px-3 py-1.5 text-sm font-semibold leading-6 text-beige shadow-md hover:bg-brown2 hover:outline hover:outline-2 hover:outline-offset-2 hover:outline-brown3"
+                                className="flex w-full mt-10 justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-md bg-beige text-brown3 outline outline-2 outline-offset-2 outline-brown3 hover:bg-brown3 hover:text-beige hover:outline-0"
                             >
                                 Sign in
                             </button>
