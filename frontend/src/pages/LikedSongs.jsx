@@ -16,21 +16,17 @@ import userContext from '../userContext'
         - use context to manage data / state across several components
 */
 const LikedSongs = () => {
-    const location = useLocation();
+    const userRender = useLoaderData();
+    const [user, setUser] = useState(userRender.data.user);
     const navigate = useNavigate();
-    // fetch user data based on state passed by login
-    const { user, setUser } = useContext(userContext);
 
-    useEffect(() => {
-        if(!user) {
-            setUser(location.state.user.user);
-        }
-    })
+    console.log(user);
 
     return (
         <div>
             <Navbar user={user} profilePic={user.profilePic}/>
             <h1>Home Page</h1>
+            <p>{user.email}</p>
         </div>
     )
 
