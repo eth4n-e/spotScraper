@@ -14,18 +14,18 @@ const Navbar = ({ profilePic }) => {
     ]
 
     return (
-        <div className="bg-brown3">
+        <div className="bg-beige border-b border-brown1">
             <div className="mx-auto px-2 max-w-7xl sm:px-6 lg:px-8">
                 <div className="relative flex h-16 items-center justify-between"> 
                     <div className="flex flex-1 items-center justify-between">
                         <div>
-                            <div className="flex space-x-6 md:-ml-4">
+                            <div className="flex space-x-12 md:-ml-4">
                                 {navigation.map( (item) => (
                                     <Link 
                                         to={item.href}
                                         key={item.name}
                                         aria-current={ location.pathname === item.href ? 'page' : undefined }
-                                        className={ `${location.pathname === item.href ? 'bg-beige text-brown2 shadow-2xl' : 'text-beige hover:bg-brown2 hover:text-beige hover:shadow-2xl'} rounded-md px-3 py-2 text-sm font-medium`}
+                                        className={ `${location.pathname === item.href ? 'bg-brown3 text-beige shadow-2xl outline outline-2 outline-offset-2 outline-brown3' : 'bg-beige text-brown3 outline outline-2 outline-offset-2 outline-brown3 hover:bg-brown3 hover:text-beige hover:outline-0 hover:shadow-2xl'} rounded-md px-3 py-2 text-sm font-medium`}
                                     >
                                         {item.name}
                                     </Link>
