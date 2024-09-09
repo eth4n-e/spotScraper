@@ -16,8 +16,7 @@ import userContext from '../userContext'
         - use context to manage data / state across several components
 */
 const LikedSongs = () => {
-    const userRender = useLoaderData();
-    const user = userRender.data.user;
+    const user = useLoaderData();
     const navigate = useNavigate();
 
     return (

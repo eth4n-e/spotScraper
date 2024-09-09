@@ -286,7 +286,9 @@ const fetchPlaylists = async (req, res) => {
 
         const playlistResponse = await fetch(playlistEndpoint, {
             method: 'GET',
-            Authorization: 'Bearer ' + user.accessToken
+            headers: {
+                Authorization: 'Bearer ' + user.accessToken
+            }
         });
 
         const playlistData = await playlistResponse.json();
