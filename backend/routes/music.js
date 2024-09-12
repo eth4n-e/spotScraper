@@ -12,9 +12,7 @@ const {
     login,
     refreshToken,
     fetchPlaylists,
-    getTracks, 
-    getTrack,
-    createTrack,
+    fetchTopTracks,
 } = require('../controllers/musicController');
 
 // use expresses router to handle all routes
@@ -30,6 +28,8 @@ router.get('/getUser', getUserSession);
 router.put('/updateUser', updateUser)
 
 router.post('/fetchPlaylists', fetchPlaylists);
+
+router.post('/fetchTopTracks', fetchTopTracks);
 
 // export router for use in server.js
 module.exports = router;
