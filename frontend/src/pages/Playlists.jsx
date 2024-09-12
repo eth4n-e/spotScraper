@@ -30,12 +30,12 @@ const Playlists = () => {
     }, [user])
 
     return (
-        <div>
+        <div className="w-100 bg-beige">
             <Navbar profilePic={user.profilePic}/>
-            <div className='mt-4 mx-4 grid grid-cols-4 gap-6'>
+            <div className='mt-4 pb-4 mx-4 grid grid-cols-4 gap-6'>
                 {
                     playlists && (playlists.map( (playlist) => (
-                    <div className="rounded-md p-2 bg-beige2 shadow-2xl" key={playlist.id}>
+                    <div className="rounded-md p-2 bg-beige2 shadow-inner shadow-brown2 hover:shadow-2xl hover:shadow-brown1 hover:border hover:border-brown1" key={playlist.id}>
                         <img className="object-cover rounded-md drop-shadow-xl " src={playlist.images[0].url} alt="Playlist cover"/>
                         <p className="mt-2 text-brown3 font-semibold">{playlist.name}: {playlist.tracks.total} tracks</p>
                     </div>  

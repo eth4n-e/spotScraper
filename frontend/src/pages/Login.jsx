@@ -19,6 +19,10 @@ const Login = () => {
             const code = searchParams.get('code');
             const state = searchParams.get('state');
 
+            if(code || state == null) {
+                navigate('/auth');
+            }
+
             const userResponse = await axios.post('/api/music/login', {
                 code,
                 state,

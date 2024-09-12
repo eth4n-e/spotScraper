@@ -2,8 +2,7 @@ import Navbar from "../components/navbar"
 import { useLoaderData } from "react-router-dom"
 
 const TopTracks = () => {
-    const userRender = useLoaderData();
-    const user = userRender.data.user;
+    const user = useLoaderData();
 
     return (
         <div>
