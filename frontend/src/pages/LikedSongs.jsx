@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState, useContext } from 'react';
+import { useNavigate, useLoaderData, useLocation } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import axios from 'axios';
-//  import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import userContext from '../userContext'
 
 
 /*
@@ -16,11 +16,10 @@ import axios from 'axios';
         - use context to manage data / state across several components
 */
 const LikedSongs = () => {
-    const location = useLocation();
+    const user = useLoaderData();
     const navigate = useNavigate();
     const [tracks, setTracks] = useState([]);
     // fetch data submitted by login form
-    const user  = location.state?.user;
 
     useEffect( () => {
         const fetchTracks = async () => {

@@ -1,10 +1,10 @@
 import {React, useState} from 'react';
-import { useNavigate, useLoaderData, Form } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
     const navigate = useNavigate();
-    const tokenData = useLoaderData();
+    const [searchParams] = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -12,26 +12,26 @@ const Login = () => {
         // pass token which was received upon render
         // use token to create a new user w/ given email and password
             // if user already exists, return existing user
-    const handleSubmit = async (e, token) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const accessToken = token.access_token;
-            const refreshToken = token.refresh_token;
-            const expiresIn = token.expires_in;
+            const code = searchParams.get('code');
+            const state = searchParams.get('state');
+
+            if(code || state == null) {
+                navigate('/auth');
+            }
 
             // create user / return existing user
             const userResponse = await axios.post('/api/music/login', {
-                accessToken,
-                refreshToken,
-                expiresIn,
+                code,
+                state,
                 email,
                 password,
             })
 
-            //  navigate to likedsongs while passing user data to the page
-                // data will be fetched with useLocation
-            navigate('/likedsongs', { state: { user: userResponse.data } })
+            navigate('/likedsongs')
         } catch (err) {
             console.log(err);
         }
@@ -45,7 +45,7 @@ const Login = () => {
                     </h2>
                 </div>
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <Form className="space-y-6" onSubmit={(e) => handleSubmit(e, tokenData.data)}>
+                    <form className="space-y-6" onSubmit={(e) => handleSubmit(e)}>
                         <div>
                             <label htmlFor="email" className="block text-base font-semibold leading-6 text-brown3">
                                 Email address
@@ -88,12 +88,12 @@ const Login = () => {
                         <div className="mt-6">
                             <button
                                 type="submit"
-                                className="flex w-full mt-10 justify-center rounded-md bg-brown3 px-3 py-1.5 text-sm font-semibold leading-6 text-beige shadow-md hover:bg-brown2 hover:outline hover:outline-2 hover:outline-offset-2 hover:outline-brown3"
+                                className="flex w-full mt-10 justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-md bg-beige text-brown3 outline outline-2 outline-offset-2 outline-brown3 hover:bg-brown3 hover:text-beige hover:outline-0"
                             >
                                 Sign in
                             </button>
                         </div>
-                    </Form>
+                    </form>
                 </div>
             </div>
     );

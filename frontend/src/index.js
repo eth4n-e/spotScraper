@@ -16,27 +16,27 @@ import Login from './pages/Login';
 import TopTracks from './pages/TopTracks';
 import Playlists from './pages/Playlists';
 
-const loginLoader = async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const spotCode = urlParams.get('code');
-  const spotState = urlParams.get('state');
-
+const userLoader = async () => {
   try {
-      const codeVerifier = window.localStorage.getItem('code_verifier');
-      // make request to backend controller which handles token exchange
-      const tokenResponse = await axios.post('/api/music/getToken', {
-          code_verifier: codeVerifier,
-          code: spotCode,
-          state: spotState,
-      });
+    // retrieve user's information stored in session
+    const userSession = await axios.get('/api/music/getUser');
 
-      // axios automatically parses the response to a JSON object (unlike fetch)
-      return tokenResponse;
+    let user = userSession.data.user;
+    
+    // access token has expired
+    if(Date.now() >= user.tokenExpiration) {
+      // update the user's tokens
+      // placing expiration check here prevents updateUser from being called every render
+      user = await axios.put('/api/music/updateUser', {
+        user: user
+      })
+    }
 
+    return user;
   } catch (err) {
-      console.error(err);
-      // Authorization was denied, redirect back to authorize page
-      return redirect('/');
+    console.error(err);
+    // can redirect to login because user should exist by this point
+    return redirect('/login');
   }
 }
 
@@ -48,28 +48,21 @@ const router = createBrowserRouter([
   {
     path:'/login',
     element: <Login />,
-    loader: loginLoader,
-    // check if the code & state are the same as before, if this is the case, the user has simply refreshed the page
-    // create and store the user before
-    shouldRevalidate: ( currentUrl, nextUrl ) => { // avoid revalidation if url is the same
-      console.log('Current url:', currentUrl);
-      console.log('Next Url:', nextUrl);
-      return currentUrl.pathname !== nextUrl.pathname
-    },
   },
   {
     path: "/likedsongs",
     element: <LikedSongs/>,
-    // loader: homeDataLoader,
-    // shouldRevalidate
+    loader: userLoader
   },
   {
     path:'/toptracks',
     element: <TopTracks/>,
+    loader: userLoader,
   },
   {
     path:'/playlists',
     element: <Playlists/>,
+    loader: userLoader,
   }
 ])
 

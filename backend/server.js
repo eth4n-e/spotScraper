@@ -3,22 +3,40 @@ require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-
+const MongoStore = require('connect-mongo');
 const musicRoutes = require('./routes/music');
+const session = require('express-session');
 // create express app
 const app = express();
 
+// use MongoDB to store sessions
+const sessionStore = MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions',
+});
 
 const corsOptions = {
     origin: 'http://localhost:3000'
 }
+
+// middleware setup
 // cross-origin resource sharing
     // ensures safe access to data / resources
     // determines which origins (protocol, hostname, port) can access resources / have permission
     // e.g. define localhost as origin, only localhost can get data / access backend resources
 app.use(cors(corsOptions));
-// middleware setup
-    // parse data sent in request into json
+    
+// setup sessions
+app.use(
+    session({
+      secret: process.env.SESSION_SECRET, // Replace with a strong secret key
+      resave: false,
+      saveUninitialized: false,
+      store: sessionStore,
+      cookie: { secure: false } // Set to true if using HTTPS
+    })
+  );
+// parse data sent in request into json
 app.use(express.json());
 app.use((req, res, next) => {
     // log path and request method
