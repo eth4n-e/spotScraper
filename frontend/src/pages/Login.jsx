@@ -23,6 +23,7 @@ const Login = () => {
                 navigate('/auth');
             }
 
+            // create user / return existing user
             const userResponse = await axios.post('/api/music/login', {
                 code,
                 state,

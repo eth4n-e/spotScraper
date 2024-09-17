@@ -276,6 +276,54 @@ const refreshToken = async (refreshToken) => {
 /** REFRESH TOKEN **/
 /*******************/
 
+/***********************/
+/** FETCH LIKED SONGS **/
+const fetchLikedSongs = async (req, res) => {
+    const token = req.body.token;
+    const country = req.body.country;
+
+    try {
+        // first endpoint to perform request
+        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?limit=50&offset=0`
+        // let tracks = []
+
+        const trackResponse = await fetch(trackEndpoint, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const trackData = await trackResponse.json();
+
+        return res.status(200).json(trackData);
+        // while(trackEndpoint) {
+        //     // make request to spotify's tracks endpoint
+        //     const trackResponse = await fetch(trackEndpoint, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Authorization': `Bearer ${token}`
+
+        //         }
+        //     });
+
+        //     // parse response to JS object
+        //     const trackData = await trackResponse.json();
+          
+        //     // update endpoint to continue fetching liked songs
+        //     trackEndpoint = trackData.data.next;
+
+        //     // add the tracks to our array
+        //     tracks.concat(trackData.data.items);
+        // }
+        // return tracks;
+    } catch (err) {
+        res.status(401).json({error: err})
+    }
+}
+/** FETCH LIKED SONGS **/
+/***********************/
+
 /*********************/
 /** FETCH PLAYLISTS **/
 const fetchPlaylists = async (req, res) => {
@@ -366,6 +414,7 @@ module.exports = {
     updateUser,
     login,
     refreshToken,
+    fetchLikedSongs,
     fetchPlaylists,
     fetchTopTracks,
 }

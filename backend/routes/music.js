@@ -10,7 +10,7 @@ const {
     getUserSession,
     updateUser,
     login,
-    refreshToken,
+    fetchLikedSongs,
     fetchPlaylists,
     fetchTopTracks,
 } = require('../controllers/musicController');
@@ -24,6 +24,8 @@ router.post('/login', login);
 router.post('/auth', redirectToSpotifyAuth);
 
 router.get('/getUser', getUserSession);
+
+router.post('/fetchLikedSongs', fetchLikedSongs);
 
 router.put('/updateUser', updateUser)
 

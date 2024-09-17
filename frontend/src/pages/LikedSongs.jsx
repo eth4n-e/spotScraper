@@ -1,8 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
-import { useNavigate, useLoaderData, useLocation } from 'react-router-dom';
+import { useNavigate, useLoaderData } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import axios from 'axios';
-import userContext from '../userContext'
 
 
 /*
@@ -18,12 +17,41 @@ import userContext from '../userContext'
 const LikedSongs = () => {
     const user = useLoaderData();
     const navigate = useNavigate();
+    const [tracks, setTracks] = useState([]);
+    // fetch data submitted by login form
+
+    useEffect( () => {
+        const fetchTracks = async () => {
+            try {
+                const fetchedTracks = await axios.post('/api/music/fetchLikedSongs', {
+                    token: user.accessToken,
+                })
+
+                const extractTracks = fetchedTracks.data.items.map( (obj) => obj.track);
+                setTracks(extractTracks);
+
+                console.log(tracks);
+            } catch(err) {
+                console.error('Error fetching tracks: ', err);
+            }
+        }
+
+        fetchTracks();
+    }, [tracks])
 
     return (
-        <div>
+        <div className="w-100 bg-beige">
             <Navbar profilePic={user.profilePic}/>
-            <h1>Home Page</h1>
-            <p>{user.email}</p>
+            <div className='mt-4 mx-4 pb-4 grid grid-cols-4 gap-6'>
+                {
+                    tracks && (tracks.map( (track) => (
+                    <div className="rounded-md p-2 bg-beige2 shadow-inner shadow-brown2 hover:shadow-2xl hover:shadow-brown1 hover:border hover:border-brown1" key={track.id}>
+                        <img className="object-cover rounded-md drop-shadow-xl " src={track.album.images[0].url} alt="Track cover"/>
+                        <p className="text-center mt-2 text-brown3 font-semibold">{track.name} by {track.artists[0].name}</p>
+                    </div>  
+                    )))
+                }
+            </div>
         </div>
     )
 
