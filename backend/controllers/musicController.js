@@ -166,6 +166,7 @@ const getUserSession = (req, res) => {
 const updateUser = async (req, res) => {
     try {
         // current session's user passed in body of request
+        console.log('request body', req.body);
         const user = req.body.user.data.user;
 
         // find associated user in db
@@ -275,49 +276,85 @@ const refreshToken = async (refreshToken) => {
 /** REFRESH TOKEN **/
 /*******************/
 
-// get all tracks
-// make request to spotify api to get top tracks for user
-const getTracks = async(req, res) => {
-    // find searches database for tracks
-        // can specify properties like so
-            // Music.find({artist_name: 'Nas'})
-            // would grab all tracks with Nas as the artist
-    const tracks = await Track.find({});
+/*********************/
+/** FETCH PLAYLISTS **/
+const fetchPlaylists = async (req, res) => {
+    const user = req.body.user;
 
-    res.status(200).json(tracks);
-}
-
-// get single track
-const getTrack = async(req, res) => {
-    const { id } = req.params;
-
-    // ensure track has a valid id
-    if(!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({error: 'No such track'});
-    }
-
-    // get a particular track
-    const track = await Track.findById(id);
-
-    if(!track) {
-        return res.status(404).json({error: 'No such track'});
-    }
-
-    res.status(200).json(track);
-}
-
-// create a track
-const createTrack = async (req, res) => {
-    const {title, artist_name} = req.body;
-
-    // add doc to db
     try {
-        const track = await Track.create({title, artist_name});
-        res.status(200).json(track);
-    } catch(error) {
-        res.status(400).json({error: error.message});
+        let playlistEndpoint = `https://api.spotify.com/v1/users/${user._id}/playlists`;
+
+        const playlistResponse = await fetch(playlistEndpoint, {
+            method: 'GET',
+            headers: {
+                Authorization: 'Bearer ' + user.accessToken
+            }
+        });
+
+        const playlistData = await playlistResponse.json();
+
+        return res.status(200).json({playlists: playlistData});
+
+        // template once we begin to implement pagination
+        // while(trackEndpoint) {
+        //     // make request to spotify's tracks endpoint
+        //     const trackResponse = await fetch(trackEndpoint, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Authorization': `Bearer ${token}`
+
+        //         }
+        //     });
+
+        //     // parse response to JS object
+        //     const trackData = await trackResponse.json();
+          
+        //     // update endpoint to continue fetching liked songs
+        //     trackEndpoint = trackData.data.next;
+
+        //     // add the tracks to our array
+        //     tracks.concat(trackData.data.items);
+        // }
+        // return tracks;
+    }  catch (err) {
+        console.log(err);
+        res.status(401).json({error: "Unable to fetch user's playlists"});
     }
 }
+
+/** FETCH PLAYLISTS **/
+/*********************/
+
+/**********************/
+/** FETCH TOP TRACKS **/
+const fetchTopTracks = async (req, res) => {
+    const user = req.body.user;
+
+    try {
+        const topItemType = 'tracks'
+        let trackEndpoint = `https://api.spotify.com/v1/me/top/${topItemType}?time_range=long_term&limit=50`;
+
+        const trackResponse = await fetch(trackEndpoint, {
+            method: "GET",
+
+            headers: {
+              Authorization: 'Bearer ' + user.accessToken  
+            }
+        })
+
+        const trackData = await trackResponse.json();
+
+        res.status(200).json({tracks: trackData});
+
+    } catch(err) {
+        console.log(err);
+        res.status(401).json({error: "Unable to fetch user's top tracks"});
+    }
+}
+
+/** FETCH TOP TRACKS **/
+/**********************/
+
 
 module.exports = {
     generateRandomString,
@@ -329,7 +366,6 @@ module.exports = {
     updateUser,
     login,
     refreshToken,
-    getTracks,
-    getTrack,
-    createTrack
+    fetchPlaylists,
+    fetchTopTracks,
 }
