@@ -36,7 +36,7 @@ const Playlists = () => {
                 {
                     playlists && (playlists.map( (playlist) => (
                     <div className="rounded-md p-2 bg-beige2 shadow-inner shadow-brown2 hover:shadow-2xl hover:shadow-brown1 hover:border hover:border-brown1" key={playlist.id}>
-                        <img className="mx-auto w-11/12 md:h-48 lg:h-64 xl:h-96  rounded-md drop-shadow-xl" src={playlist.images[0].url} alt="Playlist cover"/>
+                        <img className="mx-auto w-11/12 h-20 sm:h-32 md:h-48 lg:h-64 xl:h-96  rounded-md drop-shadow-xl" src={playlist.images[0].url} alt="Playlist cover"/>
                         <p className="mt-2 text-center text-brown3 font-semibold">{playlist.name}</p>
                         <p className="mt-2 text-center text-brown3 font-semibold">{playlist.tracks.total} tracks</p>
                     </div>  

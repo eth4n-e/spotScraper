@@ -10,6 +10,7 @@ const {
     getUserSession,
     updateUser,
     login,
+    fetchLikedSongs,
     fetchPlaylists,
     fetchTopTracks,
 } = require('../controllers/musicController');

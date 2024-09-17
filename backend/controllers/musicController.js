@@ -284,7 +284,7 @@ const fetchLikedSongs = async (req, res) => {
 
     try {
         // first endpoint to perform request
-        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?market=${country}&limit=50&offset=0`
+        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?limit=50&offset=0`
         // let tracks = []
 
         const trackResponse = await fetch(trackEndpoint, {
