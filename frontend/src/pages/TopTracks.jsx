@@ -16,24 +16,27 @@ const TopTracks = () => {
 
             console.log(trackResponse);
 
-            const trackObjects = trackResponse.data.tracks.items;
+            // use set to remove duplicates
+            const uniqueTracks = new Set(trackResponse.data.tracks);
 
-            setTopTracks(trackObjects);
+            // convert back to array to make use of map functionality to transform the data into renderable components
+            const tracks = Array.from(uniqueTracks);
+
+            setTopTracks(tracks);
         }
         fetchTopTracks(user);
-
     }, [user]);
 
     return (
         <div className="w-100 bg-beige">
             <Navbar profilePic={user.profilePic}/>
             <div className='mt-4 pb-4 mx-4 grid grid-cols-4 gap-6'>
-                {
+                { // convert topTracks backs to an array to use map functionality
                     topTracks && (topTracks.map( (track) => (
-                    <div className="rounded-md p-2 bg-beige2 shadow-inner shadow-brown2 hover:shadow-2xl hover:shadow-brown1 hover:border hover:border-brown1" key={track.id}>
-                        <img className="object-cover rounded-md drop-shadow-xl " src={track.album.images[0].url} alt="Playlist cover"/>
-                        <p className="mt-2 text-brown3 font-semibold">{track.name} by {track.artists[0].name}</p>
-                    </div>  
+                        <div className="rounded-md p-2 bg-beige2 shadow-inner shadow-brown2 hover:shadow-2xl hover:shadow-brown1 hover:border hover:border-brown1" key={track.id}>
+                            <img className="object-cover rounded-md drop-shadow-xl " src={track.album.images[0].url} alt="Playlist cover"/>
+                            <p className="mt-2 text-brown3 font-semibold">{track.name} by {track.artists[0].name}</p>
+                        </div>  
                     )))
                 }
             </div>

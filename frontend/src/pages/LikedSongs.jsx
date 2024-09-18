@@ -24,7 +24,7 @@ const LikedSongs = () => {
         const fetchTracks = async () => {
             try {
                 const fetchedTracks = await axios.post('/api/music/fetchLikedSongs', {
-                    token: user.accessToken,
+                    user,
                 })
 
                 const extractTracks = fetchedTracks.data.items.map( (obj) => obj.track);
@@ -37,7 +37,7 @@ const LikedSongs = () => {
         }
 
         fetchTracks();
-    }, [tracks])
+    }, [user])
 
     return (
         <div className="w-100 bg-beige">
