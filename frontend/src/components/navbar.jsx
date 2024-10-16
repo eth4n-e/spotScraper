@@ -17,7 +17,7 @@ const Navbar = ({ profilePic }) => {
         <div className="bg-beige border-b border-brown1">
             <div className="mx-auto px-2 max-w-7xl sm:px-6 lg:px-8">
                 <div className="relative flex h-16 items-center justify-between"> 
-                    <div className="flex flex-1 items-center justify-between">
+                    <div className="flex flex-1 items-center justify-evenly">
                         <div>
                             <div className="flex space-x-12 md:-ml-4">
                                 {navigation.map( (item) => (
@@ -32,7 +32,11 @@ const Navbar = ({ profilePic }) => {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex shrink-0 items-center justify-center sm:items-stretch">
+                        <div>
+                            <label htmlFor="search" className="mr-2 text-brown3 font-medium">Search</label>
+                            <input id="search" className="text-brown3 bg-beige px-3 py-2 border-2 border-brown3 rounded-md focus:outline-none" type="text"/>
+                        </div>
+                        <div className="flex items-center justify-center sm:items-stretch">
                             <img
                                 alt="Profile Pic"
                                 src={profilePic}
