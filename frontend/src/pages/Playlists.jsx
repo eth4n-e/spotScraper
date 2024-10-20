@@ -9,19 +9,13 @@ const Playlists = () => {
 
     useEffect(() => {
         const fetchPlaylists = async (user) => {
-            // maybe add other properties like
-                // limit (number of tracks to fetch)
-                // next (url to the next page of results)
-                // this would be once I implemented a paginated version
+    
             const playlistResponse = await axios.post('/api/music/fetchPlaylists', {
                 user
             });
-
-            // extract the actual playlists
             const playlistObjects = playlistResponse.data.playlists.items;
 
             // only want to consider playlists created / owned by the user
-            // filter all the playlists returned by ones whose owner id matches the user id
             const userOwnedPlaylists = playlistObjects.filter( (playlist) => playlist.owner.id === user._id)
 
             setPlaylists(userOwnedPlaylists);

@@ -18,7 +18,6 @@ const updateTokenDB = async (userDB, token) => {
     // tokens last for 1 hour (3600 seconds or 3600 * 1000 milliseconds)
     userDB.tokenExpiration = Date.now() + token.expires_in * 1000;
 
-    // save updates to document in db
     await userDB.save();
 }
 /** HELPER METHOD TO CHECK REFRESH TOKEN AND UPDATE DB USER */
@@ -34,7 +33,7 @@ const getAccessToken = async (code, state) => {
         const tokenEndpoint = "https://accounts.spotify.com/api/token";
         // fetch does not support form property (reason behind using body property)
         // data must be application/w-xxx-form-urlencoded
-            // URLSearchParams helps accomplish this
+        // URLSearchParams helps accomplish this
         const tokenResponse = await fetch(tokenEndpoint, {
             method: 'POST',
             headers: {
@@ -62,7 +61,7 @@ const getAccessToken = async (code, state) => {
 const refreshToken = async (refreshToken) => {
     try {
         const url = 'https://accounts.spotify.com/api/token';
-        // data necessary for refreshing token
+    
         const headers = new Headers({
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
@@ -73,7 +72,6 @@ const refreshToken = async (refreshToken) => {
             refresh_token: refreshToken
         });
 
-        // fetch token
         const updatedToken = await fetch(url, {
             method: 'POST',
             headers: headers,

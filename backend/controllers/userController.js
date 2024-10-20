@@ -73,17 +73,12 @@ const updateUser = async (req, res) => {
         // current session's user passed in body of request
         const user = req.body.user.data.user;
 
-        // find associated user in db
         const userDB = await User.findById({_id: user._id}).exec();
 
-        // check if user exists
         if(userDB) {
-            // request new token
             const updatedToken = await refreshToken(user.refreshToken);
 
-            // check if token exists
             if(updatedToken) {
-                // update user's tokens
                 updateTokenDB(userDB, updatedToken);
                 // update session information if updates to user occur
                 req.session.user = userDB
@@ -104,39 +99,28 @@ const updateUser = async (req, res) => {
 /***********/
 /** LOGIN **/
 const login = async (req, res) => {
-    /*
-    Handles:
-        - access token creation if the user has never been registered
-            - creates user in the database
-        - refreshes token if the user already exists
-    */
     try {
         const email = req.body.email;
         const password = req.body.password;
         const code = req.body.code;
         const state = req.body.state;
-        // find user with the associated email entered
-            // multiple spotify accounts cannot be linked to the same exact email 
+
+        // multiple spotify accounts cannot be linked to the same exact email 
         let user = await User.findOne({email: email}).exec();
 
-        // user has not yet been created
         if(!user) {
-            // create access token
             const token = await getAccessToken(code, state);
-            // fetch the user's profile info from spotify
             const profile = await getUserInfoSpotify(token.access_token);
             
-            // insert user into db
             user = await createUser(token, profile, email, password);
-        } else if(user && user.email == email && user.password == password) { // user exists, verify that email and password match the user's credentials
-            // refresh the user's token and update in the db
+        } else if(user && user.email == email && user.password == password) { // verify that email and password match the user's credentials
             const updatedToken = await refreshToken(user.refreshToken);
 
-            if(updatedToken) { // if new token received update the user's document
+            // refreshToken does not always return a new token so only update when it does
+            if(updatedToken) { 
                 updateTokenDB(user, updatedToken);
             }
         }
-        // store important information in the user's session
         req.session.user = user;
 
         return res.status(200).json({user: user});

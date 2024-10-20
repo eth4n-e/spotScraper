@@ -8,17 +8,6 @@ const fetchLikedSongs = async (req, res) => {
         // first endpoint to perform request
         let trackEndpoint = `https://api.spotify.com/v1/me/tracks?limit=50&offset=0`
 
-        // const trackResponse = await fetch(trackEndpoint, {
-        //     method: 'GET',
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`
-        //     }
-        // });
-
-        // const trackData = await trackResponse.json();
-
-        // return res.status(200).json(trackData);
-        // console.log(trackEndpoint);
         const tracks = await paginateLikedSongs(trackEndpoint, user.accessToken);
 
         return res.status(200).json({tracks: tracks});
@@ -39,13 +28,10 @@ const paginateLikedSongs = async (endpoint, token) => {
                 }
             });
 
-            // parse response to JS object
             const trackData = await trackResponse.json();
           
-            // update endpoint to continue fetching liked songs
             endpoint = trackData.data.next;
 
-            // add the tracks to our array
             tracks.concat(trackData.data.items);
         }
 
@@ -75,28 +61,6 @@ const fetchPlaylists = async (req, res) => {
         const playlistData = await playlistResponse.json();
 
         return res.status(200).json({playlists: playlistData});
-
-        // template once we begin to implement pagination
-        // while(trackEndpoint) {
-        //     // make request to spotify's tracks endpoint
-        //     const trackResponse = await fetch(trackEndpoint, {
-        //         method: 'GET',
-        //         headers: {
-        //             'Authorization': `Bearer ${token}`
-
-        //         }
-        //     });
-
-        //     // parse response to JS object
-        //     const trackData = await trackResponse.json();
-          
-        //     // update endpoint to continue fetching liked songs
-        //     trackEndpoint = trackData.data.next;
-
-        //     // add the tracks to our array
-        //     tracks.concat(trackData.data.items);
-        // }
-        // return tracks;
     }  catch (err) {
         console.log(err);
         res.status(401).json({error: "Unable to fetch user's playlists"});
@@ -114,16 +78,6 @@ const fetchTopTracks = async (req, res) => {
     try {
         const topItemType = 'tracks'
         let trackEndpoint = `https://api.spotify.com/v1/me/top/${topItemType}?time_range=long_term&limit=50`;
-
-        // const trackResponse = await fetch(trackEndpoint, {
-        //     method: "GET",
-
-        //     headers: {
-        //       Authorization: 'Bearer ' + user.accessToken  
-        //     }
-        // })
-
-        // const trackData = await trackResponse.json();
 
         const trackData = await paginateTopTracks(trackEndpoint, user.accessToken);
 
