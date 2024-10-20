@@ -16,6 +16,7 @@ const Login = () => {
         e.preventDefault();
 
         try {
+            const codeVerifier = localStorage.getItem('code_verifier');
             const code = searchParams.get('code');
             const state = searchParams.get('state');
 
@@ -26,6 +27,7 @@ const Login = () => {
             // create user / return existing user
             const userResponse = await axios.post('/api/music/login', {
                 code,
+                codeVerifier,
                 state,
                 email,
                 password,

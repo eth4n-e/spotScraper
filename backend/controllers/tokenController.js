@@ -25,7 +25,7 @@ const updateTokenDB = async (userDB, token) => {
 
 /***************************/
 /** ACCESS TOKEN EXCHANGE **/
-const getAccessToken = async (code, state) => {
+const getAccessToken = async (code, state, codeVerifier) => {
     if (state === null || code === null) {
       throw new Error({error: 'State mismatch'});
     } else {
@@ -44,6 +44,8 @@ const getAccessToken = async (code, state) => {
                 grant_type: 'authorization_code',
                 code: code,
                 redirect_uri: redirectUri,
+                client_id: clientId,
+                code_verifier: codeVerifier,
             }),
         });
 
@@ -64,12 +66,13 @@ const refreshToken = async (refreshToken) => {
     
         const headers = new Headers({
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
+            // 'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
         });
 
         const body = new URLSearchParams({
             grant_type: 'refresh_token',
-            refresh_token: refreshToken
+            refresh_token: refreshToken,
+            client_id: clientId,
         });
 
         const updatedToken = await fetch(url, {

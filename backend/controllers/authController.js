@@ -16,6 +16,7 @@ const generateRandomString = (length) => {
 /*******************/
 /** AUTHORIZATION **/
 const redirectToSpotifyAuth = async (req, res) => {
+    const codeChallenge = req.body.codeChallenge;
     // protection against attacks
     const state = generateRandomString(16);
     // spotify functionality we want to access
@@ -30,6 +31,8 @@ const redirectToSpotifyAuth = async (req, res) => {
             scope: scopes,
             redirect_uri: redirectUri,
             state: state,
+            code_challenge_method: 'S256',
+            code_challenge: codeChallenge,
             show_dialog: true,
         });
 
