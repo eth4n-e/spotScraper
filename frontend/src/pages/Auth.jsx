@@ -1,11 +1,6 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faSpotify} from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
-//import { generateRandomString } from '../../../backend/controllers/musicController';
-// should pass in a user possibly
-    // response from call to authorization endpoint should be stored
-    // and used to update the current user's information
-
 
 const Auth = () => {
 

@@ -2,14 +2,21 @@ const express = require('express');
 // import Music Model
 const Track = require('../models/trackModel');
 
-const { 
+const {
     redirectToSpotifyAuth,
+} = require('../controllers/authController');
+
+const {
     getAccessToken,
-    getUserInfoSpotify,
-    createUser,
+} = require('../controllers/tokenController');
+
+const {
     getUserSession,
     updateUser,
-    login,
+    login
+} = require('../controllers/userController');
+
+const { 
     fetchLikedSongs,
     fetchPlaylists,
     fetchTopTracks,

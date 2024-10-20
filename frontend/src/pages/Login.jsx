@@ -20,7 +20,7 @@ const Login = () => {
             const state = searchParams.get('state');
 
             if(code || state == null) {
-                navigate('/auth');
+                navigate('/');
             }
 
             // create user / return existing user
