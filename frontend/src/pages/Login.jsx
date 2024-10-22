@@ -59,7 +59,7 @@ const Login = () => {
                                 placeholder="Email connected to your Spotify account"
                                 required
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 px-1 text-brown2 shadow-sm ring-1 ring-inset ring-brown3 placeholder:text-brown1 placeholder:italic focus:ring-2 focus:ring-inset focus:ring-brown3 sm:text-sm sm:leading-6"
+                                className="outline-none block w-full rounded-md border-0 p-1.5 text-brown2 shadow-sm ring-1 ring-inset ring-brown3 placeholder:text-brown1 placeholder:italic focus:ring-2 focus:ring-inset focus:ring-brown3 sm:text-sm sm:leading-6"
                                 />
                             </div>
                         </div>
@@ -80,7 +80,7 @@ const Login = () => {
                                 minLength={8}
                                 required
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 px-1 text-brown2 shadow-sm ring-1 ring-inset ring-brown3 placeholder:text-brown1 placeholder:italic focus:ring-2 focus:ring-inset focus:ring-brown3 sm:text-sm sm:leading-6"
+                                className="outline-none block w-full rounded-md border-0 p-1.5 text-brown2 shadow-sm ring-1 ring-inset ring-brown3 placeholder:text-brown1 placeholder:italic focus:ring-2 focus:ring-inset focus:ring-brown3 sm:text-sm sm:leading-6"
                                 />
                             </div>
                         </div>
