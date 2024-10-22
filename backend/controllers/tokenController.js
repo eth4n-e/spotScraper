@@ -38,7 +38,7 @@ const getAccessToken = async (code, state, codeVerifier) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
+                // 'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
             },
             body: new URLSearchParams({
                 grant_type: 'authorization_code',
@@ -66,7 +66,6 @@ const refreshToken = async (refreshToken) => {
     
         const headers = new Headers({
             'Content-Type': 'application/x-www-form-urlencoded',
-            // 'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
         });
 
         const body = new URLSearchParams({
@@ -80,6 +79,8 @@ const refreshToken = async (refreshToken) => {
             headers: headers,
             body: body
         });
+
+        console.log("Updated token in refresh token endpoint: ", updatedToken);
 
         return await updatedToken.json();
     } catch (err) {

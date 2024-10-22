@@ -4,6 +4,7 @@ require('dotenv').config();
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
 const redirectUri = 'http://localhost:3000/login'; // url to redirect back to after authorization
+
 /** HELPER METHOD TO IMPLEMENT SPOTIFY AUTHORIZATION FLOW **/
 // method to generate a code verifier (high-entropy cryptographic string)
 const generateRandomString = (length) => {
