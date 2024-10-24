@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
+// const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'http://localhost:3000/login'; // url to redirect back to after authorization
 
 /*************************************************************/
@@ -25,11 +25,8 @@ const updateTokenDB = async (userDB, token) => {
 
 /***************************/
 /** ACCESS TOKEN EXCHANGE **/
-const getAccessToken = async (code, state, codeVerifier) => {
-    if (state === null || code === null) {
-      throw new Error({error: 'State mismatch'});
-    } else {
-      try {
+const getAccessToken = async (code, codeVerifier) => {
+    try {
         const tokenEndpoint = "https://accounts.spotify.com/api/token";
         // fetch does not support form property (reason behind using body property)
         // data must be application/w-xxx-form-urlencoded
@@ -38,21 +35,18 @@ const getAccessToken = async (code, state, codeVerifier) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                // 'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64')),
             },
             body: new URLSearchParams({
                 grant_type: 'authorization_code',
+                client_id: clientId,
                 code: code,
                 redirect_uri: redirectUri,
-                client_id: clientId,
                 code_verifier: codeVerifier,
             }),
         });
-
         return await tokenResponse.json();
-      } catch(err) {
+    } catch(err) {
         throw new Error({error: 'Failed to retrieve access token'})
-      }
     }
 }
 /** ACCESS TOKEN EXCHANGE **/

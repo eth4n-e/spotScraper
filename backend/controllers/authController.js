@@ -19,7 +19,7 @@ const generateRandomString = (length) => {
 const redirectToSpotifyAuth = async (req, res) => {
     const codeChallenge = req.body.codeChallenge;
     // protection against attacks
-    const state = generateRandomString(16);
+    const state = generateRandomString(16).trimStart();
     // spotify functionality we want to access
     const scopes = 'user-read-private user-read-email playlist-modify-private playlist-modify-public playlist-read-collaborative user-top-read user-library-modify user-library-read';
 

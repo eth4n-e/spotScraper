@@ -30,21 +30,18 @@ const Auth = () => {
           
             try {
                 // used for PKCE flow
-                const codeVerifier = generateRandomString(64);
+                const codeVerifier = generateRandomString(64).trimStart();
+                
                 // save codeVerifier for next step of PKCE Flow (requesting acces token)
                 localStorage.setItem('code_verifier', codeVerifier);
                 const hashed = await sha256(codeVerifier);
-                const codeChallenge = base64encode(hashed);
+                const codeChallenge = base64encode(hashed).trimStart();
 
                 // make request to server to receive back the spotify authorization url
                 const response = await axios.post('/api/music/auth', { 
                     headers: {
                         'Access-Control-Allow-Origin': 'http://localhost:3000/',
-                    },
-                    body: {
-                        codeChallenge
-                    }
-                });
+                    }, codeChallenge });
                 const authorize_url = response.data.auth_data;
                 window.location.href = authorize_url; 
             } catch(err) {

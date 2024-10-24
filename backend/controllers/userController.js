@@ -106,11 +106,16 @@ const login = async (req, res) => {
         const codeVerifier = req.body.code;
         const state = req.body.state;
 
+        console.log("Code:", code);
+        console.log("CodeVerifier:", codeVerifier);
+        console.log("State:", state);
+
         // multiple spotify accounts cannot be linked to the same exact email 
         let user = await User.findOne({email: email}).exec();
 
         if(!user) {
             const token = await getAccessToken(code, state, codeVerifier);
+            console.log("Token in login function: ", token);
             const profile = await getUserInfoSpotify(token.access_token);
             
             user = await createUser(token, profile, email, password);
