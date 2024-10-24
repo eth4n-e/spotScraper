@@ -1,6 +1,6 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLoaderData } from 'react-router-dom';
-import Navbar from '../components/navbar';
+import NavBar from '../components/NavBar';
 import axios from 'axios';
 
 
@@ -41,7 +41,7 @@ const LikedSongs = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <Navbar profilePic={user.profilePic}/>
+            <NavBar profilePic={user.profilePic}/>
             <div className='mt-4 mx-4 pb-4 grid grid-cols-4 gap-6'>
                 {
                     tracks && (tracks.map( (track) => (
