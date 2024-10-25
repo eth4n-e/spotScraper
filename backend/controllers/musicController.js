@@ -129,6 +129,52 @@ const paginateTopTracks = async (endpoint, token) => {
 /** FETCH TOP TRACKS **/
 /**********************/
 
+/************************/
+/** DELETE LIKED SONGS **/
+const deleteSelectTracks = async (req, res) => {
+    // request should contain a list of spotify track id's
+    // one request can process 50 tracks therefore
+        // create list of ids contained in the request
+        // while there are ids in the list
+            // make a request to delete
+    
+
+    // need to think more about how to break up tracks in request into 50 track lists
+    // also how would the controller handle a request handling <50 tracks
+}
+
+const deleteAllTracks = async (req, res) => {
+
+}
+/** DELETE LIKED SONGS **/
+/************************/
+
+/********************/
+/** ADD TOP TRACKS **/
+const addSelectTracks = async (req, res) => {
+
+}
+
+const addAllTracks = async (req, res) => {
+
+}
+/** ADD TOP TRACKS **/
+/********************/
+
+/*******************/
+/** ADD PLAYLISTS **/
+const addTracksFromSelectPlaylists = async (req, res) => {
+    // need to first get the items contained in the playlist so that these can be added to liked songs
+        // make separate controller for this
+
+    // make a put request to track endpoint to add these songs to user's liked songs
+}
+
+const addTracksFromAllPlaylists = async (req, res) => {
+
+}
+/** ADD PLAYLISTS **/
+/*******************/
 
 module.exports = {
     fetchLikedSongs,
