@@ -7,7 +7,6 @@ const {
     refreshToken,
 } = require('./tokenController');
 
-
 /****************************************/
 /** USER RETRIEVAL + CREATION + UPDATE **/
 const getUserInfoSpotify = async (accessToken) => {

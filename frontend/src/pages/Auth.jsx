@@ -52,7 +52,7 @@ const Auth = () => {
     return (
         <form onSubmit={handleAuth}>
             <div className="absolute bottom-0 left-0 bg-beige size-full p-0 mx-auto">
-                <div className='relative top-1/4 bg-brown3 backdrop-saturate-2 shadow-inner drop-shadow-xl w-8/12 h-3/6 mx-auto rounded-xl text-center'>
+                <div className='relative top-1/4 bg-brown3 backdrop-saturate-2 shadow-inner drop-shadow-xl w-8/12 h-3/6 mx-auto rounded-xl text-center border-2 border-brown2'>
                     <header className="bg-beige drop-shadow-xl rounded-t-xl">
                         <h1 className='py-6 font-bold text-xl text-brown3'>Authorize Via Spotify</h1>
                     </header>
