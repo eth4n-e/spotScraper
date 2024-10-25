@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLoaderData } from 'react-router-dom';
 import NavBar from '../components/NavBar';
+import TrackCard from '../components/TrackCard';
 import axios from 'axios';
 
 
@@ -18,6 +19,9 @@ const LikedSongs = () => {
     const user = useLoaderData();
     const navigate = useNavigate();
     const [tracks, setTracks] = useState([]);
+    const [clickedTracks, setClickedTracks] = useState([]);
+    const [counter, setCounter] = useState(0);
+
     // fetch data submitted by login form
 
     useEffect( () => {
@@ -27,7 +31,9 @@ const LikedSongs = () => {
                     user,
                 })
 
-                const extractTracks = fetchedTracks.data.items.map( (obj) => obj.track);
+                console.log(fetchedTracks);
+
+                const extractTracks = fetchedTracks.data.tracks.items.map( (obj) => obj.track);
                 setTracks(extractTracks);
 
                 console.log(tracks);
@@ -39,16 +45,30 @@ const LikedSongs = () => {
         fetchTracks();
     }, [user])
 
+    const handleCardClick = (id) => {
+        // have to update list in a state setter for React to handle properly
+        setClickedTracks(prevList => {
+            let updatedTrackList = [];
+
+            if (prevList.indexOf(id) === -1) { // track not present in list
+                updatedTrackList = [...prevList, id];
+            } else {
+                // create new array without element that was clicked
+                updatedTrackList = prevList.filter(trackId => trackId !== id);
+            }
+            setCounter(updatedTrackList.length);
+
+            return updatedTrackList;
+        });
+    }
+
     return (
         <div className="w-100 bg-beige">
-            <NavBar profilePic={user.profilePic}/>
+            <NavBar profilePic={user.profilePic} buttonType={"Delete"} counter={counter}/>
             <div className='mt-4 mx-4 pb-4 grid grid-cols-4 gap-6'>
                 {
                     tracks && (tracks.map( (track) => (
-                    <div className="rounded-md p-2 bg-beige2 shadow-inner shadow-brown2 transition ease-in-out duration-500 hover:-translate-y-1 hover:bg-beige1 hover:shadow-2xl hover:shadow-brown1 hover:border hover:border-brown1" key={track.id}>
-                        <img className="object-cover rounded-md drop-shadow-xl " src={track.album.images[0].url} alt="Track cover"/>
-                        <p className="text-center mt-2 text-brown3 font-semibold">{track.name} by {track.artists[0].name}</p>
-                    </div>  
+                        <TrackCard track={track} handleCardClick={handleCardClick} isClicked={clickedTracks.includes(track.id)}/>
                     )))
                 }
             </div>

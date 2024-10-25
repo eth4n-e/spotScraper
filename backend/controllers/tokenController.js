@@ -74,8 +74,6 @@ const refreshToken = async (refreshToken) => {
             body: body
         });
 
-        console.log("Updated token in refresh token endpoint: ", updatedToken);
-
         return await updatedToken.json();
     } catch (err) {
         console.error(err);

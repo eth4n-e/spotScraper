@@ -50,7 +50,7 @@ const router = createBrowserRouter([
   {
     path: "/likedsongs",
     element: <LikedSongs/>,
-    loader: userLoader
+    loader: userLoader,
   },
   {
     path:'/toptracks',

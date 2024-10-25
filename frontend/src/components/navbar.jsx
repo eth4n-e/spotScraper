@@ -38,6 +38,9 @@ const NavBar = ({ profilePic, buttonType, counter }) => {
                 <li>
                     <CounterButton label={buttonType} counter={counter}/>
                 </li>
+                <li>
+                    <button className="text-brown3 bg-beige px-3 py-1.5 border-2 border-brown3 rounded-md hover:bg-brown3 hover:text-beige">{buttonType} All</button>
+                </li>
                 <li className="grow">
                     <img
                         alt="Profile Pic"
