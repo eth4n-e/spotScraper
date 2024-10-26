@@ -7,7 +7,6 @@ import axios from "axios"
 const TopTracks = () => {
     const user = useLoaderData();
     const [topTracks, setTopTracks] = useState([]);
-    const [counter, setCounter] = useState(0);
     const [clickedTracks, setClickedTracks] = useState([]);
 
     useEffect( () => {
@@ -39,7 +38,6 @@ const TopTracks = () => {
                 // create new array without element that was clicked
                 updatedTrackList = prevList.filter(trackId => trackId !== id);
             }
-            setCounter(updatedTrackList.length);
 
             return updatedTrackList;
         });
@@ -47,7 +45,7 @@ const TopTracks = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <NavBar profilePic={user.profilePic} buttonType={"Add"} counter={counter}/>
+            <NavBar user={user} idList={clickedTracks}/>
             <div className='mt-6 pb-4 mx-4 grid grid-cols-4 gap-6'>
                 {
                     topTracks && (topTracks.map( (track) => (

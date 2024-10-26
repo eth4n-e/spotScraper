@@ -20,7 +20,6 @@ const LikedSongs = () => {
     const navigate = useNavigate();
     const [tracks, setTracks] = useState([]);
     const [clickedTracks, setClickedTracks] = useState([]);
-    const [counter, setCounter] = useState(0);
 
     // fetch data submitted by login form
 
@@ -56,7 +55,6 @@ const LikedSongs = () => {
                 // create new array without element that was clicked
                 updatedTrackList = prevList.filter(trackId => trackId !== id);
             }
-            setCounter(updatedTrackList.length);
 
             return updatedTrackList;
         });
@@ -64,7 +62,7 @@ const LikedSongs = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <NavBar profilePic={user.profilePic} buttonType={"Delete"} counter={counter}/>
+            <NavBar user={user} idList={clickedTracks}/>
             <div className='mt-4 mx-4 pb-4 grid grid-cols-4 gap-6'>
                 {
                     tracks && (tracks.map( (track) => (

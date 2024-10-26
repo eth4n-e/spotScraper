@@ -4,8 +4,6 @@
 const fetchLikedSongs = async (req, res) => {
     const user = req.body.user;
 
-    console.log(user);
-
     try {
         // first endpoint to perform request
         let trackEndpoint = `https://api.spotify.com/v1/me/tracks?limit=50&offset=0`;
@@ -138,7 +136,7 @@ const deleteSelectTracks = async (req, res) => {
         // while there are ids in the list
             // make a request to delete
     
-
+            
     // need to think more about how to break up tracks in request into 50 track lists
     // also how would the controller handle a request handling <50 tracks
 }

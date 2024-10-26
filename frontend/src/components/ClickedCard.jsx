@@ -1,5 +1,5 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faCheck} from '@fortawesome/free-solid-svg-icons';
+// import {faCheck} from '@fortawesome/free-solid-svg-icons';
 import {faSpotify} from '@fortawesome/free-brands-svg-icons';
 
 const ClickedCard = ({id, handleCardClick}) => {
