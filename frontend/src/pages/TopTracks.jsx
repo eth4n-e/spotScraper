@@ -45,7 +45,7 @@ const TopTracks = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <NavBar user={user} idList={clickedTracks}/>
+            <NavBar user={user} idList={clickedTracks} setClickedTracks={setClickedTracks} setTracks={setTopTracks}/>
             <div className='mt-6 pb-4 mx-4 grid grid-cols-4 gap-6'>
                 {
                     topTracks && (topTracks.map( (track) => (

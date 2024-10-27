@@ -30,12 +30,8 @@ const LikedSongs = () => {
                     user,
                 })
 
-                console.log(fetchedTracks);
-
                 const extractTracks = fetchedTracks.data.tracks.items.map( (obj) => obj.track);
                 setTracks(extractTracks);
-
-                console.log(tracks);
             } catch(err) {
                 console.error('Error fetching tracks: ', err);
             }
@@ -62,7 +58,7 @@ const LikedSongs = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <NavBar user={user} idList={clickedTracks}/>
+            <NavBar user={user} idList={clickedTracks} setClickedTracks={setClickedTracks} setTracks={setTracks}/>
             <div className='mt-4 mx-4 pb-4 grid grid-cols-4 gap-6'>
                 {
                     tracks && (tracks.map( (track) => (

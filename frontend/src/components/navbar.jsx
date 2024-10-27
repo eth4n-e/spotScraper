@@ -5,7 +5,7 @@ import AddCounterButton from './AddCounterButton';
 import axios from 'axios';
 // return navbar template
 // remember curly braces inside parentheses, destructing, reading data contained within the object
-const NavBar = ({ user, idList }) => {
+const NavBar = ({ user, idList, setClickedTracks, setTracks }) => {
     // using location to handle knowing which page we are currently on
         // compare the path to the href
     const location = useLocation();
@@ -22,6 +22,8 @@ const NavBar = ({ user, idList }) => {
 
     const handleDeleteFromLiked = async  () => {
         try {
+            console.log("Id list pre-delete: ", idList);
+
             const adjustTrackEndpoint = TRACK_ENDPOINT + `?ids=${idList}`;
 
             await axios.delete(adjustTrackEndpoint, {
@@ -31,7 +33,16 @@ const NavBar = ({ user, idList }) => {
                 },
             });
 
-            console.log('Tracks removed');
+            // remove tracks from liked songs
+            setTracks(prevList => {
+                let updatedTrackList = [];
+                
+                updatedTrackList = prevList.filter(track => !idList.includes(track.id));
+
+                return updatedTrackList;
+            })
+            // remove every track that was in the list
+            setClickedTracks(idList.filter(id => !idList.includes(id)))
         } catch(err) {
             console.error(err);
         }
@@ -66,11 +77,11 @@ const NavBar = ({ user, idList }) => {
                 </li>
                 <li>
                     {location.pathname === '/likedsongs' ? (
-                        <DeleteCounterButton idList={idList} handleClick={handleDeleteFromLiked}/>
+                        <DeleteCounterButton idList={idList} handleClick={handleDeleteFromLiked} disabled={idList.length === 0}/>
                     ) : (
                         location.pathname === '/playlists' ? 
-                        <AddCounterButton idList={idList} handleClick={handleAddFromPlaylist}/> : 
-                        <AddCounterButton idList={idList} handleClick={handleAddFromTopTracks}/>
+                        <AddCounterButton idList={idList} handleClick={handleAddFromPlaylist} disabled={idList.length === 0}/> : 
+                        <AddCounterButton idList={idList} handleClick={handleAddFromTopTracks} disabled={idList.length === 0}/>
                     )}
                 </li>
                 <li>
