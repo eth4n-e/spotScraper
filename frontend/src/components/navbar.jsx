@@ -16,14 +16,30 @@ const NavBar = ({ user, idList, setClickedTracks, setTracks }) => {
         // use this local list to make the request to spotify for adding these tracks
     }
     
-    const handleAddFromTopTracks = () => {
+    const handleAddFromTopTracks = async () => {
         // can immediately make the request to add songs
+        try {
+            const adjustTrackEndpoint = TRACK_ENDPOINT + `?ids=${idList}`;
+
+            await axios({
+                method: 'put',
+                url: adjustTrackEndpoint,
+                headers: {
+                    'Authorization': `Bearer ${user.accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            // no need for setTracks here because navigating to liked songs will cause re-render
+            // remove every track that was in the list
+            setClickedTracks(idList.filter(id => !idList.includes(id)))
+        } catch(err) {
+            console.error(err);
+        }
     }
 
     const handleDeleteFromLiked = async  () => {
         try {
-            console.log("Id list pre-delete: ", idList);
-
             const adjustTrackEndpoint = TRACK_ENDPOINT + `?ids=${idList}`;
 
             await axios.delete(adjustTrackEndpoint, {
@@ -80,8 +96,8 @@ const NavBar = ({ user, idList, setClickedTracks, setTracks }) => {
                         <DeleteCounterButton idList={idList} handleClick={handleDeleteFromLiked} disabled={idList.length === 0}/>
                     ) : (
                         location.pathname === '/playlists' ? 
-                        <AddCounterButton idList={idList} handleClick={handleAddFromPlaylist} disabled={idList.length === 0}/> : 
-                        <AddCounterButton idList={idList} handleClick={handleAddFromTopTracks} disabled={idList.length === 0}/>
+                            (<AddCounterButton idList={idList} handleClick={handleAddFromPlaylist} disabled={idList.length === 0}/>) : 
+                            (<AddCounterButton idList={idList} handleClick={handleAddFromTopTracks} disabled={idList.length === 0}/>)
                     )}
                 </li>
                 <li>
