@@ -5,7 +5,7 @@ import AddCounterButton from './AddCounterButton';
 import axios from 'axios';
 // return navbar template
 // remember curly braces inside parentheses, destructing, reading data contained within the object
-const NavBar = ({ user, idList, setClickedTracks, setTracks }) => {
+const NavBar = ({ user, idList, setClicked, setTracks = null }) => {
     // using location to handle knowing which page we are currently on
         // compare the path to the href
     const location = useLocation();
@@ -14,6 +14,46 @@ const NavBar = ({ user, idList, setClickedTracks, setTracks }) => {
     const handleAddFromPlaylist = () => {
         // use the idList to fetch items from each playlist, add this to a local variable list
         // use this local list to make the request to spotify for adding these tracks
+        try {
+            let trackList = [];
+            let playlistEndpoint = '';
+
+            idList.forEach( async (id) => {
+                playlistEndpoint = `https://api.spotify.com/v1/playlists/${id}/tracks`;
+
+                while(playlistEndpoint) {
+                    const playlist = await axios({
+                        method: 'get',
+                        url: playlistEndpoint,
+                        headers: {
+                            'Authorization': `Bearer ${user.accessToken}`,
+                        },
+                        params: {
+                            limit: 50,
+                            fields: 'next,items(track(id))',
+                        }
+                    });
+
+                    console.log("Playlist")
+
+                    playlistEndpoint = playlist.data.next;
+
+                    // add only the track id to the trackList
+                    trackList.push(playlist.data.items.map(item => item.id));
+                }
+            })
+
+            // to do:
+                // update clicked playlist
+
+            console.log(trackList);
+        } catch(err) {
+            console.error(err);
+        }
+        // step by step:
+            // for each playlist, fetch playlist items
+            // for all items, add to liked songs
+        
     }
     
     const handleAddFromTopTracks = async () => {
@@ -32,7 +72,7 @@ const NavBar = ({ user, idList, setClickedTracks, setTracks }) => {
 
             // no need for setTracks here because navigating to liked songs will cause re-render
             // remove every track that was in the list
-            setClickedTracks(idList.filter(id => !idList.includes(id)))
+            setClicked(idList.filter(id => !idList.includes(id)))
         } catch(err) {
             console.error(err);
         }
@@ -58,7 +98,7 @@ const NavBar = ({ user, idList, setClickedTracks, setTracks }) => {
                 return updatedTrackList;
             })
             // remove every track that was in the list
-            setClickedTracks(idList.filter(id => !idList.includes(id)))
+            setClicked(idList.filter(id => !idList.includes(id)))
         } catch(err) {
             console.error(err);
         }

@@ -46,7 +46,7 @@ const Playlists = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <NavBar user={user} idList={clickedPlaylists}/>
+            <NavBar user={user} idList={clickedPlaylists} setClicked={setClickedPlaylists}/>
             <div className='mt-4 pb-4 mx-4 grid grid-cols-4 gap-6'>
                 {
                     playlists && (playlists.map( (playlist) => (
