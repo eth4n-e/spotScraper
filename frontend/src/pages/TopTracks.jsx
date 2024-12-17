@@ -3,6 +3,7 @@ import TrackCard from "../components/TrackCard";
 import { useLoaderData } from "react-router-dom"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { createHandleCardClick } from '../utils/helpers.js';
 
 const TopTracks = () => {
     const user = useLoaderData();
@@ -27,21 +28,7 @@ const TopTracks = () => {
         fetchTopTracks(user);
     }, [user]);
 
-    const handleCardClick = (id) => {
-        // have to update list in a state setter for React to handle properly
-        setClickedTracks(prevList => {
-            let updatedTrackList = [];
-
-            if (prevList.indexOf(id) === -1) { // track not present in list
-                updatedTrackList = [...prevList, id];
-            } else {
-                // create new array without element that was clicked
-                updatedTrackList = prevList.filter(trackId => trackId !== id);
-            }
-
-            return updatedTrackList;
-        });
-    }
+    const handleCardClick = createHandleCardClick(setClickedTracks);
 
     return (
         <div className="w-100 bg-beige">

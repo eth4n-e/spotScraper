@@ -3,6 +3,8 @@ import { useNavigate, useLoaderData } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import TrackCard from '../components/TrackCard';
 import axios from 'axios';
+import { createHandleCardClick } from '../utils/helpers';
+import { create } from 'connect-mongo';
 
 const LikedSongs = () => {
     const user = useLoaderData();
@@ -29,21 +31,7 @@ const LikedSongs = () => {
         fetchTracks();
     }, [user])
 
-    const handleCardClick = (id) => {
-        // have to update list in a state setter for React to handle properly
-        setClickedTracks(prevList => {
-            let updatedTrackList = [];
-
-            if (prevList.indexOf(id) === -1) { // track not present in list
-                updatedTrackList = [...prevList, id];
-            } else {
-                // create new array without element that was clicked
-                updatedTrackList = prevList.filter(trackId => trackId !== id);
-            }
-
-            return updatedTrackList;
-        });
-    }
+    const handleCardClick = createHandleCardClick(setClickedTracks);
 
     return (
         <div className="w-100 bg-beige">

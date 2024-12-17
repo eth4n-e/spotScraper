@@ -3,6 +3,7 @@ import PlaylistCard from '../components/PlaylistCard';
 import { useEffect, useState } from 'react'
 import { useLoaderData } from 'react-router-dom'
 import axios from 'axios';
+import { createHandleCardClick } from '../utils/helpers.js';
 
 const Playlists = () => {
     const user = useLoaderData();
@@ -27,22 +28,7 @@ const Playlists = () => {
         fetchPlaylists(user);
     }, [user])
 
-    const handleCardClick = (id) => {
-        // have to update list in a state setter for React to handle properly
-        setClickedPlaylists(prevList => {
-            let updatedPlaylistArr = [];
-
-            if (prevList.indexOf(id) === -1) { // track not present in list
-                updatedPlaylistArr = [...prevList, id];
-            } else {
-                // create new array without element that was clicked
-                updatedPlaylistArr = prevList.filter(trackId => trackId !== id);
-            }
-
-            // updated list becomes the new state upon return
-            return updatedPlaylistArr;
-        });
-    }
+    const handleCardClick = createHandleCardClick(setClickedPlaylists);
 
     return (
         <div className="w-100 bg-beige">

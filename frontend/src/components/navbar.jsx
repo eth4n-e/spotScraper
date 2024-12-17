@@ -34,8 +34,6 @@ const NavBar = ({ user, idList, setClicked, setTracks = null }) => {
                         }
                     });
 
-                    console.log("Playlist")
-
                     playlistEndpoint = playlist.data.next;
 
                     // add only the track id to the trackList
