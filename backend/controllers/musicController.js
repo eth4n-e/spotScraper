@@ -28,6 +28,7 @@ const paginateLikedSongs = async (endpoint, token) => {
     try {
         const tracks = [];
 
+        // fetch all tracks
         while(endpoint) {
             const trackResponse = await fetch(endpoint, {
                 method: 'GET',
@@ -36,11 +37,12 @@ const paginateLikedSongs = async (endpoint, token) => {
                 }
             });
 
+            // body of response parsed in json
             const trackData = await trackResponse.json();
-          
-            endpoint = trackData.data.next;
 
-            tracks.concat(trackData.data.items);
+            endpoint = trackData.next;
+
+            tracks.concat(trackData.items);
         }
 
         return tracks;

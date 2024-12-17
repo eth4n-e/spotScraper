@@ -103,7 +103,6 @@ const login = async (req, res) => {
         const password = req.body.password;
         const code = req.body.code;
         const codeVerifier = req.body.codeVerifier;
- 
         // multiple spotify accounts cannot be linked to the same exact email 
         let user = await User.findOne({email: email}).exec();
 
@@ -121,6 +120,7 @@ const login = async (req, res) => {
             }
         }
         req.session.user = user;
+        console.log(req.session.user);
 
         return res.status(200).json({user: user});
     } catch(err) {
