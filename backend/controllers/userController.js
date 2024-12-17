@@ -103,19 +103,13 @@ const login = async (req, res) => {
         const email = req.body.email;
         const password = req.body.password;
         const code = req.body.code;
-        const codeVerifier = req.body.code;
-        const state = req.body.state;
-
-        console.log("Code:", code);
-        console.log("CodeVerifier:", codeVerifier);
-        console.log("State:", state);
+        const codeVerifier = req.body.codeVerifier;
 
         // multiple spotify accounts cannot be linked to the same exact email 
         let user = await User.findOne({email: email}).exec();
 
         if(!user) {
-            const token = await getAccessToken(code, state, codeVerifier);
-            console.log("Token in login function: ", token);
+            const token = await getAccessToken(code, codeVerifier);
             const profile = await getUserInfoSpotify(token.access_token);
             
             user = await createUser(token, profile, email, password);
@@ -124,12 +118,11 @@ const login = async (req, res) => {
 
             // refreshToken does not always return a new token so only update when it does
             if(updatedToken) { 
-                console.log("User: ", user);
-                console.log("Updated token: ", updatedToken);
                 updateTokenDB(user, updatedToken);
             }
         }
         req.session.user = user;
+        console.log(req.session.user);
 
         return res.status(200).json({user: user});
     } catch(err) {

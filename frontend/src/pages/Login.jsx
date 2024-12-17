@@ -9,9 +9,9 @@ const Login = () => {
     const [password, setPassword] = useState('');
 
     // submit form
-        // pass token which was received upon render
-        // use token to create a new user w/ given email and password
-            // if user already exists, return existing user
+    // pass token which was received upon render
+    // use token to create a new user w/ given email and password
+    // if user already exists, return existing user
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -25,7 +25,7 @@ const Login = () => {
             }
 
             // create user / return existing user
-            const userResponse = await axios.post('/api/music/login', {
+            await axios.post('/api/music/login', {
                 code,
                 codeVerifier,
                 state,
