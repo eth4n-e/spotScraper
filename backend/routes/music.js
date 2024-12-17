@@ -1,5 +1,4 @@
 const express = require('express');
-
 const {
     redirectToSpotifyAuth,
 } = require('../controllers/authController');

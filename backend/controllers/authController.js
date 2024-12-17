@@ -4,6 +4,7 @@ require('dotenv').config();
 // client credentials / necessary data for spotify requests
 const clientId = process.env.CLIENT_ID;
 const redirectUri = 'http://localhost:3000/login'; // url to redirect back to after authorization
+
 /** HELPER METHOD TO IMPLEMENT SPOTIFY AUTHORIZATION FLOW **/
 // method to generate a code verifier (high-entropy cryptographic string)
 const generateRandomString = (length) => {
@@ -16,8 +17,9 @@ const generateRandomString = (length) => {
 /*******************/
 /** AUTHORIZATION **/
 const redirectToSpotifyAuth = async (req, res) => {
+    const codeChallenge = req.body.codeChallenge;
     // protection against attacks
-    const state = generateRandomString(16);
+    const state = generateRandomString(16).trimStart();
     // spotify functionality we want to access
     const scopes = 'user-read-private user-read-email playlist-modify-private playlist-modify-public playlist-read-collaborative user-top-read user-library-modify user-library-read';
 
@@ -30,6 +32,8 @@ const redirectToSpotifyAuth = async (req, res) => {
             scope: scopes,
             redirect_uri: redirectUri,
             state: state,
+            code_challenge_method: 'S256',
+            code_challenge: codeChallenge,
             show_dialog: true,
         });
 
