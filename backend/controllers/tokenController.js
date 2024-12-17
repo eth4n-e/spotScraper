@@ -4,9 +4,9 @@ const User = require('../models/userModel');
 const mongoose = require('mongoose');
 
 // client credentials / necessary data for spotify requests
-const clientId = process.env.CLIENT_ID;
+const CLIENT_ID = process.env.CLIENT_ID;
 // const clientSecret = process.env.CLIENT_SECRET;
-const redirectUri = 'http://localhost:3000/login'; // url to redirect back to after authorization
+const REDIRECT_URI = 'http://localhost:3000/login'; // url to redirect back to after authorization
 
 /*************************************************************/
 /** HELPER METHOD TO CHECK REFRESH TOKEN AND UPDATE DB USER */
@@ -38,9 +38,9 @@ const getAccessToken = async (code, codeVerifier) => {
             },
             body: new URLSearchParams({
                 grant_type: 'authorization_code',
-                client_id: clientId,
+                client_id: CLIENT_ID,
                 code: code,
-                redirect_uri: redirectUri,
+                redirect_uri: REDIRECT_URI,
                 code_verifier: codeVerifier,
             }),
         });
@@ -65,7 +65,7 @@ const refreshToken = async (refreshToken) => {
         const body = new URLSearchParams({
             grant_type: 'refresh_token',
             refresh_token: refreshToken,
-            client_id: clientId,
+            client_id: CLIENT_ID,
         });
 
         const updatedToken = await fetch(url, {
@@ -73,8 +73,6 @@ const refreshToken = async (refreshToken) => {
             headers: headers,
             body: body
         });
-
-        console.log("Updated token in refresh token endpoint: ", updatedToken);
 
         return await updatedToken.json();
     } catch (err) {

@@ -4,13 +4,23 @@
 const fetchLikedSongs = async (req, res) => {
     const user = req.body.user;
 
+    console.log(user);
+
     try {
         // first endpoint to perform request
-        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?limit=50&offset=0`
+        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?limit=50&offset=0`;
 
-        const tracks = await paginateLikedSongs(trackEndpoint, user.accessToken);
+        const trackResponse = await fetch(trackEndpoint, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${user.accessToken}`
+            }
+        });
 
-        return res.status(200).json({tracks: tracks});
+        const trackData = await trackResponse.json();
+        // const tracks = await paginateLikedSongs(trackEndpoint, user.accessToken);
+
+        return res.status(200).json({tracks: trackData});
     } catch (err) {
         res.status(401).json({error: err})
     }

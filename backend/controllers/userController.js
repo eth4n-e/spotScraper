@@ -7,7 +7,6 @@ const {
     refreshToken,
 } = require('./tokenController');
 
-
 /****************************************/
 /** USER RETRIEVAL + CREATION + UPDATE **/
 const getUserInfoSpotify = async (accessToken) => {
@@ -104,7 +103,6 @@ const login = async (req, res) => {
         const password = req.body.password;
         const code = req.body.code;
         const codeVerifier = req.body.codeVerifier;
-
         // multiple spotify accounts cannot be linked to the same exact email 
         let user = await User.findOne({email: email}).exec();
 

@@ -31,7 +31,7 @@ const Login = () => {
                 state,
                 email,
                 password,
-            })
+            });
 
             navigate('/likedsongs')
         } catch (err) {
