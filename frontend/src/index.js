@@ -29,7 +29,7 @@ const userLoader = async () => {
         user: user
       })
     }
-
+    
     return user;
   } catch (err) {
     console.error(err);

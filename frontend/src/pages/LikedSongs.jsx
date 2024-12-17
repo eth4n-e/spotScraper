@@ -4,17 +4,6 @@ import NavBar from '../components/NavBar';
 import TrackCard from '../components/TrackCard';
 import axios from 'axios';
 
-
-/*
-    - need to pass in a User 
-        - use User data to make client-side requests to fetch:
-            - top tracks
-            - spotify profile picture
-        - use a useEffect hook at the top of the function
-    - not sure of use of useState & useContext here
-        - use state to manage internal state of component (changing info related only to the home page)
-        - use context to manage data / state across several components
-*/
 const LikedSongs = () => {
     const user = useLoaderData();
     const navigate = useNavigate();

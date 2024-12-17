@@ -23,7 +23,6 @@ const Auth = () => {
             .replace(/\+/g, '-')
             .replace(/\//g, '_');
     } 
-    
 
     const handleAuth = async (e) => {
             e.preventDefault();
@@ -31,8 +30,8 @@ const Auth = () => {
             try {
                 // used for PKCE flow
                 const codeVerifier = generateRandomString(64).trimStart();
-                
-                // save codeVerifier for next step of PKCE Flow (requesting acces token)
+
+                // save codeVerifier for next step of PKCE Flow (requesting access token)
                 localStorage.setItem('code_verifier', codeVerifier);
                 const hashed = await sha256(codeVerifier);
                 const codeChallenge = base64encode(hashed).trimStart();
