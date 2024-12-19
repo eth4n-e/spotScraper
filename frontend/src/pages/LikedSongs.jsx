@@ -4,7 +4,6 @@ import NavBar from '../components/NavBar';
 import TrackCard from '../components/TrackCard';
 import axios from 'axios';
 import { createHandleCardClick } from '../utils/helpers';
-import { create } from 'connect-mongo';
 
 const LikedSongs = () => {
     const user = useLoaderData();
@@ -39,7 +38,7 @@ const LikedSongs = () => {
             <div className='mt-4 mx-4 pb-4 grid grid-cols-4 gap-6'>
                 {
                     tracks && (tracks.map( (track) => (
-                        <TrackCard track={track} handleCardClick={handleCardClick} isClicked={clickedTracks.includes(track.id)}/>
+                        <TrackCard track={track} handleCardClick={handleCardClick} isClicked={clickedTracks.includes(track.id)} key={track.id}/>
                     )))
                 }
             </div>

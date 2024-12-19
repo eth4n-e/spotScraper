@@ -1,8 +1,7 @@
 import { redirect } from "react-router-dom";
 import axios from "axios";
 
-export const createHandleCardClick = ({stateUpdateFunction}) => {
-    
+export const createHandleCardClick = (stateUpdateFunction) => {
     // return function which updates list of items (tracks, playlists)
     // takes as parameter the appropriate state updating function
     return (id) => {
@@ -16,12 +15,34 @@ export const createHandleCardClick = ({stateUpdateFunction}) => {
                 // create new array without element that was clicked
                 updatedArr = prevList.filter(trackId => trackId !== id);
             }
-
             // updated list becomes the new state upon return
             return updatedArr;
         });
     }
 }
+
+export const createHandleAddFromTopTracks = () => {
+  return async function handleAddFromTopTracks(user, idList) {
+    await axios('/api/music/addSelectTracksToLikedSongs', {
+      method: 'put',
+      data: {user, idList}, // in put requests pass payload in data property
+    });
+  }
+}
+
+export const createHandleAddFromPlaylists = () => {
+   
+}
+
+export const createHandleDeleteFromLiked = () => {
+  return async function handleDeleteFromLiked(user, idList) {
+    await axios('/api/music/deleteSelectLikedSongs', {
+      method: 'delete',
+      data: {user, idList}, // in delete requests pass payload in data property
+    });
+  }
+}
+
 
 // method which updates user token and session data if necessary
 // runs on every page load of liked songs, top tracks, playlists

@@ -107,7 +107,6 @@ const paginateTopTracks = async (endpoint, token) => {
         while(endpoint && tracks.length < 1000) {
             const trackResponse = await fetch(endpoint, {
                 method: "GET",
-    
                 headers: {
                   Authorization: 'Bearer ' + token  
                 }
@@ -131,19 +130,28 @@ const paginateTopTracks = async (endpoint, token) => {
 
 /************************/
 /** DELETE LIKED SONGS **/
-const deleteSelectTracks = async (req, res) => {
-    // request should contain a list of spotify track id's
-    // one request can process 50 tracks therefore
-        // create list of ids contained in the request
-        // while there are ids in the list
-            // make a request to delete
-    
-            
-    // need to think more about how to break up tracks in request into 50 track lists
-    // also how would the controller handle a request handling <50 tracks
+const deleteSelectLikedSongs = async (req, res) => {
+    try {
+        let trackIds = req.body.idList;
+        let token = req.body.user.accessToken;
+        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?ids=${trackIds}`
+
+        await fetch(trackEndpoint, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        res.status(200).json({"message": "Tracks successfully removed from liked songs"});
+
+    } catch (err) {
+        console.error(err);
+    }
 }
 
-const deleteAllTracks = async (req, res) => {
+const deleteAllLikedSongs = async (req, res) => {
 
 }
 /** DELETE LIKED SONGS **/
@@ -151,11 +159,26 @@ const deleteAllTracks = async (req, res) => {
 
 /********************/
 /** ADD TOP TRACKS **/
-const addSelectTracks = async (req, res) => {
+const addSelectTracksToLikedSongs = async (req, res) => {
+    try {
+        let trackIds = req.body.idList;
+        let token = req.body.user.accessToken;
+        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?ids=${trackIds}`;
+        await fetch(trackEndpoint, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            }
+        })
 
+        res.status(201).json({"message": "Tracks successfully added to liked songs"});
+    } catch (err) {
+        console.error(err);
+    }
 }
 
-const addAllTracks = async (req, res) => {
+const addAllTracksToLikedSongs = async (req, res) => {
 
 }
 /** ADD TOP TRACKS **/
@@ -180,4 +203,6 @@ module.exports = {
     fetchLikedSongs,
     fetchPlaylists,
     fetchTopTracks,
+    addSelectTracksToLikedSongs,
+    deleteSelectLikedSongs,
 }

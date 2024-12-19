@@ -71,6 +71,7 @@ const updateUser = async (req, res) => {
     try {
         // current session's user passed in body of request
         const user = req.body.user.data.user;
+        console.log(user);
 
         const userDB = await User.findById({_id: user._id}).exec();
 

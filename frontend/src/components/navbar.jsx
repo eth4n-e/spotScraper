@@ -2,105 +2,18 @@
 import { Link, useLocation } from 'react-router-dom'
 import DeleteCounterButton from './DeleteCounterButton';
 import AddCounterButton from './AddCounterButton';
-import axios from 'axios';
+import { createHandleAddFromTopTracks, createHandleAddFromPlaylists, createHandleDeleteFromLiked } from '../utils/helpers';
 // return navbar template
 // remember curly braces inside parentheses, destructing, reading data contained within the object
 const NavBar = ({ user, idList, setClicked, setTracks = null }) => {
     // using location to handle knowing which page we are currently on
         // compare the path to the href
     const location = useLocation();
-    const TRACK_ENDPOINT = 'https://api.spotify.com/v1/me/tracks';
 
-    const handleAddFromPlaylist = () => {
-        // use the idList to fetch items from each playlist, add this to a local variable list
-        // use this local list to make the request to spotify for adding these tracks
-        try {
-            let trackList = [];
-            let playlistEndpoint = '';
-
-            idList.forEach( async (id) => {
-                playlistEndpoint = `https://api.spotify.com/v1/playlists/${id}/tracks`;
-
-                while(playlistEndpoint) {
-                    const playlist = await axios({
-                        method: 'get',
-                        url: playlistEndpoint,
-                        headers: {
-                            'Authorization': `Bearer ${user.accessToken}`,
-                        },
-                        params: {
-                            limit: 50,
-                            fields: 'next,items(track(id))',
-                        }
-                    });
-
-                    playlistEndpoint = playlist.data.next;
-
-                    // add only the track id to the trackList
-                    trackList.push(playlist.data.items.map(item => item.id));
-                }
-            })
-
-            // to do:
-                // update clicked playlist
-
-            console.log(trackList);
-        } catch(err) {
-            console.error(err);
-        }
-        // step by step:
-            // for each playlist, fetch playlist items
-            // for all items, add to liked songs
-        
-    }
-    
-    const handleAddFromTopTracks = async () => {
-        // can immediately make the request to add songs
-        try {
-            const adjustTrackEndpoint = TRACK_ENDPOINT + `?ids=${idList}`;
-
-            await axios({
-                method: 'put',
-                url: adjustTrackEndpoint,
-                headers: {
-                    'Authorization': `Bearer ${user.accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            // no need for setTracks here because navigating to liked songs will cause re-render
-            // remove every track that was in the list
-            setClicked(idList.filter(id => !idList.includes(id)))
-        } catch(err) {
-            console.error(err);
-        }
-    }
-
-    const handleDeleteFromLiked = async  () => {
-        try {
-            const adjustTrackEndpoint = TRACK_ENDPOINT + `?ids=${idList}`;
-
-            await axios.delete(adjustTrackEndpoint, {
-                headers: {
-                    'Authorization': `Bearer ${user.accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            // remove tracks from liked songs
-            setTracks(prevList => {
-                let updatedTrackList = [];
-                
-                updatedTrackList = prevList.filter(track => !idList.includes(track.id));
-
-                return updatedTrackList;
-            })
-            // remove every track that was in the list
-            setClicked(idList.filter(id => !idList.includes(id)))
-        } catch(err) {
-            console.error(err);
-        }
-    }
+    // convert to a backend controller
+    const handleAddFromPlaylists = createHandleAddFromPlaylists();
+    const handleAddFromTopTracks = createHandleAddFromTopTracks();
+    const handleDeleteFromLiked = createHandleDeleteFromLiked();
 
     const navigation = [
         {name: 'Liked Songs', href:'/likedsongs'},
@@ -131,11 +44,11 @@ const NavBar = ({ user, idList, setClicked, setTracks = null }) => {
                 </li>
                 <li>
                     {location.pathname === '/likedsongs' ? (
-                        <DeleteCounterButton idList={idList} handleClick={handleDeleteFromLiked} disabled={idList.length === 0}/>
+                        <DeleteCounterButton idList={idList} handleClick={() => handleDeleteFromLiked(user, idList)} disabled={idList.length === 0}/>
                     ) : (
                         location.pathname === '/playlists' ? 
-                            (<AddCounterButton idList={idList} handleClick={handleAddFromPlaylist} disabled={idList.length === 0}/>) : 
-                            (<AddCounterButton idList={idList} handleClick={handleAddFromTopTracks} disabled={idList.length === 0}/>)
+                            (<AddCounterButton idList={idList} handleClick={handleAddFromPlaylists} disabled={idList.length === 0}/>) : 
+                            (<AddCounterButton idList={idList} handleClick={() => handleAddFromTopTracks(user, idList)} disabled={idList.length === 0}/>)
                     )}
                 </li>
                 <li>

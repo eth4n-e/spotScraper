@@ -17,6 +17,8 @@ const {
     fetchLikedSongs,
     fetchPlaylists,
     fetchTopTracks,
+    deleteSelectLikedSongs,
+    addSelectTracksToLikedSongs
 } = require('../controllers/musicController');
 
 // use expresses router to handle all routes
@@ -36,6 +38,10 @@ router.put('/updateUser', updateUser)
 router.post('/fetchPlaylists', fetchPlaylists);
 
 router.post('/fetchTopTracks', fetchTopTracks);
+
+router.put('/addSelectTracksToLikedSongs', addSelectTracksToLikedSongs);
+
+router.delete('/deleteSelectLikedSongs', deleteSelectLikedSongs);
 
 // export router for use in server.js
 module.exports = router;

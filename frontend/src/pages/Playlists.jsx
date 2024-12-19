@@ -36,7 +36,7 @@ const Playlists = () => {
             <div className='mt-4 pb-4 mx-4 grid grid-cols-4 gap-6'>
                 {
                     playlists && (playlists.map( (playlist) => (
-                        <PlaylistCard playlist={playlist} handleCardClick={handleCardClick} isClicked={clickedPlaylists.includes(playlist.id)}/>
+                        <PlaylistCard playlist={playlist} handleCardClick={handleCardClick} isClicked={clickedPlaylists.includes(playlist.id)} key={playlist.id}/>
                     )))
                 }
             </div>

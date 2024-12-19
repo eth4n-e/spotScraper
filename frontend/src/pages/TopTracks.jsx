@@ -38,7 +38,7 @@ const TopTracks = () => {
                     topTracks && (topTracks.map( (track) => (
                         // whenever handleCardClick is invoked in TrackCard component (updates state in this component) a re-render triggers
                         // that's why isClicked can be updated
-                        <TrackCard track={track} handleCardClick={handleCardClick} isClicked={clickedTracks.includes(track.id)}/> 
+                        <TrackCard track={track} handleCardClick={handleCardClick} isClicked={clickedTracks.includes(track.id)} key={track.id}/> 
                     )))
                 }
             </div>
