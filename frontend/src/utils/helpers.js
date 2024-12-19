@@ -22,11 +22,14 @@ export const createHandleCardClick = (stateUpdateFunction) => {
 }
 
 export const createHandleAddFromTopTracks = () => {
-  return async function handleAddFromTopTracks(user, idList) {
+  return async function handleAddFromTopTracks(user, idList, setClicked) {
     await axios('/api/music/addSelectTracksToLikedSongs', {
       method: 'put',
       data: {user, idList}, // in put requests pass payload in data property
     });
+
+    // setClicked(idList.filter(id => !idList.includes(id))); there must be a better way to remove all items from a list
+
   }
 }
 
@@ -35,12 +38,21 @@ export const createHandleAddFromPlaylists = () => {
 }
 
 export const createHandleDeleteFromLiked = () => {
-  return async function handleDeleteFromLiked(user, idList) {
+  return async function handleDeleteFromLiked(user, idList, setClicked, setTracks) {
     await axios('/api/music/deleteSelectLikedSongs', {
       method: 'delete',
       data: {user, idList}, // in delete requests pass payload in data property
     });
   }
+
+  // setClicked(idList.filter(id => !idList.includes(id))); also maybe package this into a helper method -> resetClickedTracksState
+  /* remove deleted tracks from the state maintaining the list of liked songs
+  setTracks(prevList => {
+    let updatedTrackList = [];
+    updatedTrackList = prevList.filter(track => !idList.includes(track.id));
+    return updatedTrackList;
+    })
+  */
 }
 
 

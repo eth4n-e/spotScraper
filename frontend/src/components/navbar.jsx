@@ -5,7 +5,7 @@ import AddCounterButton from './AddCounterButton';
 import { createHandleAddFromTopTracks, createHandleAddFromPlaylists, createHandleDeleteFromLiked } from '../utils/helpers';
 // return navbar template
 // remember curly braces inside parentheses, destructing, reading data contained within the object
-const NavBar = ({ user, idList, setClicked, setTracks = null }) => {
+const NavBar = ({ user, idList, setClickedCards, setTracks = null }) => {
     // using location to handle knowing which page we are currently on
         // compare the path to the href
     const location = useLocation();
@@ -44,11 +44,11 @@ const NavBar = ({ user, idList, setClicked, setTracks = null }) => {
                 </li>
                 <li>
                     {location.pathname === '/likedsongs' ? (
-                        <DeleteCounterButton idList={idList} handleClick={() => handleDeleteFromLiked(user, idList)} disabled={idList.length === 0}/>
+                        <DeleteCounterButton idList={idList} handleClick={() => handleDeleteFromLiked(user, idList, setClickedCards, setTracks)} disabled={idList.length === 0}/>
                     ) : (
                         location.pathname === '/playlists' ? 
                             (<AddCounterButton idList={idList} handleClick={handleAddFromPlaylists} disabled={idList.length === 0}/>) : 
-                            (<AddCounterButton idList={idList} handleClick={() => handleAddFromTopTracks(user, idList)} disabled={idList.length === 0}/>)
+                            (<AddCounterButton idList={idList} handleClick={() => handleAddFromTopTracks(user, idList, setClickedCards)} disabled={idList.length === 0}/>)
                     )}
                 </li>
                 <li>
