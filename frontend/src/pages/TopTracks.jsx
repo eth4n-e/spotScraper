@@ -1,5 +1,6 @@
 import NavBar from "../components/NavBar";
 import TrackCard from "../components/TrackCard";
+import ClickedTrackCard from "../components/ClickedTrackCard.jsx";
 import { useLoaderData } from "react-router-dom"
 import { useEffect, useState } from "react"
 import axios from "axios"
@@ -32,13 +33,15 @@ const TopTracks = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <NavBar user={user} idList={clickedTracks} setClickedTracks={setClickedTracks}/>
+            <NavBar user={user} itemIds={clickedTracks} setClickedCards={setClickedTracks}/>
             <div className='mt-6 pb-4 mx-4 grid grid-cols-4 gap-6'>
                 {
                     topTracks && (topTracks.map( (track) => (
-                        // whenever handleCardClick is invoked in TrackCard component (updates state in this component) a re-render triggers
-                        // that's why isClicked can be updated
-                        <TrackCard track={track} handleCardClick={handleCardClick} isClicked={clickedTracks.includes(track.id)} key={track.id}/> 
+                        clickedTracks.includes(track.id) ? (
+                            <ClickedTrackCard track={track} handleCardClick={handleCardClick} key={track.id}/>
+                        ) : (
+                            <TrackCard track={track} handleCardClick={handleCardClick} key={track.id}/> 
+                        )
                     )))
                 }
             </div>

@@ -5,11 +5,12 @@ import AddCounterButton from './AddCounterButton';
 import { createHandleAddFromTopTracks, createHandleAddFromPlaylists, createHandleDeleteFromLiked } from '../utils/helpers';
 // return navbar template
 // remember curly braces inside parentheses, destructing, reading data contained within the object
-const NavBar = ({ user, idList, setClickedCards, setTracks = null }) => {
+const NavBar = ({ user, itemIds, setClickedCards, setTracks = null }) => {
     // using location to handle knowing which page we are currently on
         // compare the path to the href
     const location = useLocation();
 
+    console.log(itemIds);
     // convert to a backend controller
     const handleAddFromPlaylists = createHandleAddFromPlaylists();
     const handleAddFromTopTracks = createHandleAddFromTopTracks();
@@ -44,11 +45,11 @@ const NavBar = ({ user, idList, setClickedCards, setTracks = null }) => {
                 </li>
                 <li>
                     {location.pathname === '/likedsongs' ? (
-                        <DeleteCounterButton idList={idList} handleClick={() => handleDeleteFromLiked(user, idList, setClickedCards, setTracks)} disabled={idList.length === 0}/>
+                        <DeleteCounterButton itemIds={itemIds} handleClick={() => handleDeleteFromLiked(user, itemIds, setClickedCards, setTracks)} disabled={itemIds.length === 0}/>
                     ) : (
                         location.pathname === '/playlists' ? 
-                            (<AddCounterButton idList={idList} handleClick={handleAddFromPlaylists} disabled={idList.length === 0}/>) : 
-                            (<AddCounterButton idList={idList} handleClick={() => handleAddFromTopTracks(user, idList, setClickedCards)} disabled={idList.length === 0}/>)
+                            (<AddCounterButton itemIds={itemIds} handleClick={() => handleAddFromPlaylists(user, itemIds, setClickedCards)} disabled={itemIds.length === 0}/>) : 
+                            (<AddCounterButton itemIds={itemIds} handleClick={() => handleAddFromTopTracks(user, itemIds, setClickedCards)} disabled={itemIds.length === 0}/>)
                     )}
                 </li>
                 <li>

@@ -1,5 +1,6 @@
 import NavBar from '../components/NavBar';
 import PlaylistCard from '../components/PlaylistCard';
+import ClickedPlaylistCard from '../components/ClickedPlaylistCard.jsx';
 import { useEffect, useState } from 'react'
 import { useLoaderData } from 'react-router-dom'
 import axios from 'axios';
@@ -21,8 +22,6 @@ const Playlists = () => {
             // only want to consider playlists created / owned by the user
             const userOwnedPlaylists = playlistObjects.filter( (playlist) => playlist.owner.id === user._id)
 
-            console.log(userOwnedPlaylists);
-
             setPlaylists(userOwnedPlaylists);
         }
         fetchPlaylists(user);
@@ -32,11 +31,15 @@ const Playlists = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <NavBar user={user} idList={clickedPlaylists} setClicked={setClickedPlaylists}/>
+            <NavBar user={user} itemIds={clickedPlaylists} setClickedCards={setClickedPlaylists}/>
             <div className='mt-4 pb-4 mx-4 grid grid-cols-4 gap-6'>
                 {
                     playlists && (playlists.map( (playlist) => (
-                        <PlaylistCard playlist={playlist} handleCardClick={handleCardClick} isClicked={clickedPlaylists.includes(playlist.id)} key={playlist.id}/>
+                        clickedPlaylists.includes(playlist.id) ? (
+                            <ClickedPlaylistCard playlist={playlist} handleCardClick={handleCardClick} key={playlist.id}/>
+                        ) : (
+                            <PlaylistCard playlist={playlist} handleCardClick={handleCardClick} key={playlist.id}/>
+                        )
                     )))
                 }
             </div>

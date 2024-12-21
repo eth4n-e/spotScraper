@@ -1,3 +1,5 @@
+const { chunkArray } = require('../utils/helpers.js');
+
 // Purpose: implement the functionality of the routes, keep music.js (file for routes) clean
 /***********************/
 /** FETCH LIKED SONGS **/
@@ -186,11 +188,59 @@ const addAllTracksToLikedSongs = async (req, res) => {
 
 /*******************/
 /** ADD PLAYLISTS **/
-const addTracksFromSelectPlaylists = async (req, res) => {
+const addTracksFromSelectPlaylistsToLikedSongs = async (req, res) => {
     // need to first get the items contained in the playlist so that these can be added to liked songs
         // make separate controller for this
 
     // make a put request to track endpoint to add these songs to user's liked songs
+    try {
+        const CHUNK_SIZE = 50;
+        let playlistIds = req.body.itemIds;
+        let token = req.body.user.accessToken;
+        let tracks = [];
+        
+        // retrieve all tracks from each playlist
+        // think about converting this to promise.all for concurrent processing
+        playlistIds.forEach( async id => {
+            let endpoint = `https://api.spotify.com/v1/playlists/${id}/tracks`;
+
+            while(endpoint) {
+                let getPlaylistItems = await fetch(endpoint, {
+                    method: "GET",
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                let playlistData = await getPlaylistItems.json();
+
+                endpoint = playlistData.next;
+
+                tracks.push(playlistData.items);
+            }
+        });
+
+        let chunkedTracks = chunkArray(tracks, CHUNK_SIZE);
+
+        chunkedTracks.forEach( async trackBatch => {
+            console.log(trackBatch);
+            let trackEndpoint = `https://api.spotify.com/v1/me/tracks?ids=${trackBatch}`;
+            const addTrackResponse = await fetch(trackEndpoint, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const addTrackData = addTrackResponse.json();
+            
+            trackEndpoint = addTrackData.next;
+        })
+    } catch(err) {
+        console.error(err);
+    }
 }
 
 const addTracksFromAllPlaylists = async (req, res) => {
@@ -205,4 +255,5 @@ module.exports = {
     fetchTopTracks,
     addSelectTracksToLikedSongs,
     deleteSelectLikedSongs,
+    addTracksFromSelectPlaylistsToLikedSongs,
 }

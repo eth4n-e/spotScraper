@@ -4,6 +4,7 @@ import NavBar from '../components/NavBar';
 import TrackCard from '../components/TrackCard';
 import axios from 'axios';
 import { createHandleCardClick } from '../utils/helpers';
+import ClickedTrackCard from '../components/ClickedTrackCard';
 
 const LikedSongs = () => {
     const user = useLoaderData();
@@ -34,11 +35,15 @@ const LikedSongs = () => {
 
     return (
         <div className="w-100 bg-beige">
-            <NavBar user={user} idList={clickedTracks} setClickedTracks={setClickedTracks} setTracks={setTracks}/>
+            <NavBar user={user} itemIds={clickedTracks} setClickedCards={setClickedTracks} setTracks={setTracks}/>
             <div className='mt-4 mx-4 pb-4 grid grid-cols-4 gap-6'>
                 {
                     tracks && (tracks.map( (track) => (
-                        <TrackCard track={track} handleCardClick={handleCardClick} isClicked={clickedTracks.includes(track.id)} key={track.id}/>
+                        clickedTracks.includes(track.id) ? (
+                            <ClickedTrackCard track={track} handleCardClick={handleCardClick} key={track.id}/>
+                        ) : (
+                            <TrackCard track={track} handleCardClick={handleCardClick} key={track.id}/>
+                        )
                     )))
                 }
             </div>
