@@ -23,8 +23,10 @@ const addTracksToLikedSongsHelper = async (token, trackIds) => {
   }
 }
 
+// handle making the request to spotify to add tracks
 const addTracksToLikedSongsAPIReq = async (token, trackBatch) => {
   try {
+      // TO-DO: think about adding a request to https://api.spotify.com/v1/me/tracks/contains so I'm only adding new tracks to liked songs
       let trackEndpoint = `https://api.spotify.com/v1/me/tracks?ids=${trackBatch}`;
       const result = await fetch(trackEndpoint, {
           method: 'PUT',
@@ -70,7 +72,6 @@ const getPlaylistItems = async (token, id) => {
 }
 
 module.exports = {
-    chunkArray,
-    addTracksToLikedSongsHelper,
-    getPlaylistItems,
+  addTracksToLikedSongsHelper,
+  getPlaylistItems
 }
