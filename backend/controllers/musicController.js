@@ -1,4 +1,4 @@
-const { chunkArray } = require('../utils/helpers.js');
+const { addTracksToLikedSongsHelper, getPlaylistItems } = require('../utils/helpers');
 
 // Purpose: implement the functionality of the routes, keep music.js (file for routes) clean
 /***********************/
@@ -132,7 +132,7 @@ const paginateTopTracks = async (endpoint, token) => {
 
 /************************/
 /** DELETE LIKED SONGS **/
-const deleteSelectLikedSongs = async (req, res) => {
+const deleteLikedSongs = async (req, res) => {
     try {
         let trackIds = req.body.idList;
         let token = req.body.user.accessToken;
@@ -159,20 +159,14 @@ const deleteAllLikedSongs = async (req, res) => {
 /** DELETE LIKED SONGS **/
 /************************/
 
-/********************/
-/** ADD TOP TRACKS **/
-const addSelectTracksToLikedSongs = async (req, res) => {
+/****************/
+/** ADD TRACKS **/
+const addTracksToLikedSongs = async (req, res) => {
     try {
         let trackIds = req.body.idList;
         let token = req.body.user.accessToken;
-        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?ids=${trackIds}`;
-        await fetch(trackEndpoint, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            }
-        })
+        
+        const addResult = await addTracksToLikedSongsHelper(token, trackIds);
 
         res.status(201).json({"message": "Tracks successfully added to liked songs"});
     } catch (err) {
@@ -183,61 +177,30 @@ const addSelectTracksToLikedSongs = async (req, res) => {
 const addAllTracksToLikedSongs = async (req, res) => {
 
 }
-/** ADD TOP TRACKS **/
-/********************/
+/** ADD TRACKS **/
+/****************/
 
 /*******************/
 /** ADD PLAYLISTS **/
-const addTracksFromSelectPlaylistsToLikedSongs = async (req, res) => {
+const addTracksFromPlaylistsToLikedSongs = async (req, res) => {
     // need to first get the items contained in the playlist so that these can be added to liked songs
         // make separate controller for this
 
     // make a put request to track endpoint to add these songs to user's liked songs
     try {
-        const CHUNK_SIZE = 50;
         let playlistIds = req.body.itemIds;
         let token = req.body.user.accessToken;
-        let tracks = [];
-        
-        // retrieve all tracks from each playlist
-        // think about converting this to promise.all for concurrent processing
-        playlistIds.forEach( async id => {
-            let endpoint = `https://api.spotify.com/v1/playlists/${id}/tracks`;
+  
+        const allPlaylistItems = await Promise.allSettled(playlistIds.map(id => getPlaylistItems(token, id)));
 
-            while(endpoint) {
-                let getPlaylistItems = await fetch(endpoint, {
-                    method: "GET",
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    }
-                });
+        // result was coming back as 2D array, addTracksToLikedSongsHelper expects a 1D array to perform chunking
+        const allTrackIds = allPlaylistItems[0].value.flat();
 
-                let playlistData = await getPlaylistItems.json();
+        const addResult = await addTracksToLikedSongsHelper(token, allTrackIds);
 
-                endpoint = playlistData.next;
+        // console.log(addResult);
 
-                tracks.push(playlistData.items);
-            }
-        });
-
-        let chunkedTracks = chunkArray(tracks, CHUNK_SIZE);
-
-        chunkedTracks.forEach( async trackBatch => {
-            console.log(trackBatch);
-            let trackEndpoint = `https://api.spotify.com/v1/me/tracks?ids=${trackBatch}`;
-            const addTrackResponse = await fetch(trackEndpoint, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            const addTrackData = addTrackResponse.json();
-            
-            trackEndpoint = addTrackData.next;
-        })
+        res.status(201).json({"message": "Tracks from each playlist have been added to liked songs"});
     } catch(err) {
         console.error(err);
     }
@@ -253,7 +216,7 @@ module.exports = {
     fetchLikedSongs,
     fetchPlaylists,
     fetchTopTracks,
-    addSelectTracksToLikedSongs,
-    deleteSelectLikedSongs,
-    addTracksFromSelectPlaylistsToLikedSongs,
+    addTracksToLikedSongs,
+    deleteLikedSongs,
+    addTracksFromPlaylistsToLikedSongs,
 }

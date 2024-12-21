@@ -9,8 +9,6 @@ const NavBar = ({ user, itemIds, setClickedCards, setTracks = null }) => {
     // using location to handle knowing which page we are currently on
         // compare the path to the href
     const location = useLocation();
-
-    console.log(itemIds);
     // convert to a backend controller
     const handleAddFromPlaylists = createHandleAddFromPlaylists();
     const handleAddFromTopTracks = createHandleAddFromTopTracks();

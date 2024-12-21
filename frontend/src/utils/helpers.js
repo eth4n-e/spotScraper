@@ -25,7 +25,7 @@ export const createHandleAddFromTopTracks = () => {
   return async function handleAddFromTopTracks(user, itemIds, setClicked) {
     setClicked(itemIds.filter(id => !itemIds.includes(id)));
 
-    await axios('/api/music/addSelectTracksToLikedSongs', {
+    await axios('/api/music/addTracksToLikedSongs', {
       method: 'put',
       data: {user, itemIds}, // in put requests pass payload in data property
     });
@@ -36,7 +36,7 @@ export const createHandleAddFromPlaylists = () => {
    return async function handleAddFromPlaylist(user, itemIds, setClicked) {
     setClicked(itemIds.filter(id => !itemIds.includes(id)));
 
-    await axios('/api/music/addTracksFromSelectPlaylistsToLikedSongs', {
+    await axios('/api/music/addTracksFromPlaylistsToLikedSongs', {
       method: 'put',
       data: {user, itemIds}
     })
@@ -45,7 +45,7 @@ export const createHandleAddFromPlaylists = () => {
 
 export const createHandleDeleteFromLiked = () => {
   return async function handleDeleteFromLiked(user, itemIds, setClicked, setTracks) {
-    await axios('/api/music/deleteSelectLikedSongs', {
+    await axios('/api/music/deleteLikedSongs', {
       method: 'delete',
       data: {user, itemIds}, // in delete requests pass payload in data property
     });
