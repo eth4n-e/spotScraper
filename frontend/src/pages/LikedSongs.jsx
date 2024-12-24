@@ -21,8 +21,10 @@ const LikedSongs = () => {
                     user,
                 })
 
-                const extractTracks = fetchedTracks.data.tracks.items.map( (obj) => obj.track);
-                setTracks(extractTracks);
+                console.log("Fetched tracks: ", fetchedTracks);
+
+                const extractedTracks = fetchedTracks.data.tracks;
+                setTracks(extractedTracks);
             } catch(err) {
                 console.error('Error fetching tracks: ', err);
             }

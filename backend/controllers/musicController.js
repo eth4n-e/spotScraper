@@ -1,11 +1,12 @@
-const { addTracksToLikedSongsHelper, getPlaylistItems } = require('../utils/helpers.js');
-const { pLimit } = require('p-limit');
+import { addTracksToLikedSongsHelper, getPlaylistItems } from '../utils/helpers.js';
+import pLimit from 'p-limit';
 
 // Purpose: implement the functionality of the routes, keep music.js (file for routes) clean
 /***********************/
 /** FETCH LIKED SONGS **/
 const fetchLikedSongs = async (req, res) => {
     try {
+        let tracks = [];
         const token = req.body.user.accessToken;
         const LIMIT = 50;
         let offset = 0;
@@ -20,23 +21,28 @@ const fetchLikedSongs = async (req, res) => {
             }
         });
 
-        const trackData = await firstPageOfTracks.json();
+        const initialTracks = await firstPageOfTracks.json();
         offset += LIMIT;
-        const TOTAL_TRACKS = trackData.total;
+        const TOTAL_TRACKS = initialTracks.total;
+        tracks = initialTracks.items.map(trackObject => trackObject.track);
 
-        const tracks = await paginateLikedSongs(token, TOTAL_TRACKS, LIMIT, offset);
+        const remainingTracks = await paginateLikedSongs(token, TOTAL_TRACKS, LIMIT, offset);
 
-        return res.status(200).json({tracks: trackData});
+        tracks = tracks.concat(remainingTracks.map(trackObject => trackObject.track));
+
+        return res.status(200).json({tracks});
     } catch (err) {
         res.status(401).json({error: err})
     }
 }
 
+
 const paginateLikedSongs = async (token, totalTracks, trackLimit, trackOffset) => {
     try {
-        const requestLimit = pLimit(15);
+        const requestLimit = pLimit(2);
         const LIMIT = trackLimit;
         let offset = trackOffset;
+
 
         const requests = [];
         let newEndpoint;
@@ -53,31 +59,15 @@ const paginateLikedSongs = async (token, totalTracks, trackLimit, trackOffset) =
                     }
                 }).then(response => response.json()))
             );
-
             offset += LIMIT;
         }
 
+        // returns an array of each fulfilled request
         const trackResults = await Promise.allSettled(requests);
-
-        console.log("Track results from paginateLikedSongs: " ,trackResults[1].value);
-        // fetch all tracks
-        // while(endpoint) {
-        //     const trackResponse = await fetch(endpoint, {
-        //         method: 'GET',
-        //         headers: {
-        //             'Authorization': `Bearer ${token}`
-        //         }
-        //     });
-
-        //     // body of response parsed in json
-        //     const trackData = await trackResponse.json();
-
-        //     endpoint = trackData.next;
-
-        //     tracks.concat(trackData.items);
-        // }
-
-        // return tracks;
+        
+        // items is an array so map(items) creates a 2D array, flatten this to a 1D array
+        return trackResults.map(result => result.value.items).flat();
+    
     } catch(err) {
         throw new Error({error: 'Unable to retrieve liked songs list'});
     }
@@ -240,7 +230,7 @@ const addTracksFromAllPlaylists = async (req, res) => {
 /** ADD PLAYLISTS **/
 /*******************/
 
-module.exports = {
+export {
     fetchLikedSongs,
     fetchPlaylists,
     fetchTopTracks,
