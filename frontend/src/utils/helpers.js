@@ -61,6 +61,18 @@ export const createHandleDeleteFromLiked = () => {
   }
 }
 
+export const createHandleDeleteAllLiked = () => {
+  return async function handleDeleteAllLiked(user, setTracks) {
+    await axios('/api/music/deleteAllLikedSongs', {
+      method: 'delete',
+      data: {user}
+    });
+
+    // no tracks to display after complete deletion
+    setTracks([]);
+  }
+}
+
 
 // method which updates user token and session data if necessary
 // runs on every page load of liked songs, top tracks, playlists

@@ -19,9 +19,7 @@ const LikedSongs = () => {
             try {
                 const fetchedTracks = await axios.post('/api/music/fetchLikedSongs', {
                     user,
-                })
-
-                console.log("Fetched tracks: ", fetchedTracks);
+                });
 
                 const extractedTracks = fetchedTracks.data.tracks;
                 setTracks(extractedTracks);

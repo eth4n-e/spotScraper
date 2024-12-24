@@ -2,7 +2,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import DeleteCounterButton from './DeleteCounterButton';
 import AddCounterButton from './AddCounterButton';
-import { createHandleAddFromTopTracks, createHandleAddFromPlaylists, createHandleDeleteFromLiked } from '../utils/helpers';
+import { createHandleAddFromTopTracks, createHandleAddFromPlaylists, createHandleDeleteFromLiked, createHandleDeleteAllLiked } from '../utils/helpers';
 // return navbar template
 // remember curly braces inside parentheses, destructing, reading data contained within the object
 const NavBar = ({ user, itemIds, setClickedCards, setTracks = null }) => {
@@ -13,6 +13,7 @@ const NavBar = ({ user, itemIds, setClickedCards, setTracks = null }) => {
     const handleAddFromPlaylists = createHandleAddFromPlaylists();
     const handleAddFromTopTracks = createHandleAddFromTopTracks();
     const handleDeleteFromLiked = createHandleDeleteFromLiked();
+    const handleDeleteAllLiked = createHandleDeleteAllLiked();
 
     const navigation = [
         {name: 'Liked Songs', href:'/likedsongs'},
@@ -52,7 +53,7 @@ const NavBar = ({ user, itemIds, setClickedCards, setTracks = null }) => {
                 </li>
                 <li>
                     {location.pathname === '/likedsongs' ? (
-                        <button className="text-brown3 bg-beige px-3 py-1.5 border-2 border-brown3 rounded-md hover:bg-brown3 hover:text-beige">Delete All</button>
+                        <button onClick={() => handleDeleteAllLiked()}className="text-brown3 bg-beige px-3 py-1.5 border-2 border-brown3 rounded-md hover:bg-brown3 hover:text-beige">Delete All</button>
                     ) : (
                         <button className="text-brown3 bg-beige px-3 py-1.5 border-2 border-brown3 rounded-md hover:bg-brown3 hover:text-beige">Add All</button>
                     )}

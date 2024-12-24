@@ -6,29 +6,9 @@ import pLimit from 'p-limit';
 /** FETCH LIKED SONGS **/
 const fetchLikedSongs = async (req, res) => {
     try {
-        let tracks = [];
         const token = req.body.user.accessToken;
-        const LIMIT = 50;
-        let offset = 0;
-        // first endpoint to perform request
-        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?limit=${LIMIT}&offset=${offset}`;
-
-        const firstPageOfTracks = await fetch(trackEndpoint, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            }
-        });
-
-        const initialTracks = await firstPageOfTracks.json();
-        offset += LIMIT;
-        const TOTAL_TRACKS = initialTracks.total;
-        tracks = initialTracks.items.map(trackObject => trackObject.track);
-
-        const remainingTracks = await paginateLikedSongs(token, TOTAL_TRACKS, LIMIT, offset);
-
-        tracks = tracks.concat(remainingTracks.map(trackObject => trackObject.track));
+        
+        let tracks = await paginateLikedSongs(token);
 
         return res.status(200).json({tracks});
     } catch (err) {
@@ -36,42 +16,41 @@ const fetchLikedSongs = async (req, res) => {
     }
 }
 
-
-const paginateLikedSongs = async (token, totalTracks, trackLimit, trackOffset) => {
+const paginateLikedSongs = async (token) => {
     try {
-        const requestLimit = pLimit(2);
-        const LIMIT = trackLimit;
-        let offset = trackOffset;
+        const LIMIT = 50;
+        const OFFSET = 0;
+        let tracks = [];
 
+        let trackEndpoint = `https://api.spotify.com/v1/me/tracks?limit=${LIMIT}&offset=${OFFSET}`;
 
-        const requests = [];
-        let newEndpoint;
+        // responses from Get User's Saved Tracks contains a next key which points to next endpoint
+        // next endpoint for last page of tracks is null
+        while(trackEndpoint !== null) {
+            let trackData = await fetch(trackEndpoint, {
+                method: "GET",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json', 
+                }
+            }).then(response => response.json());
 
-        while(offset < totalTracks) {
-            newEndpoint = `https://api.spotify.com/v1/me/tracks?limit=${LIMIT}&offset=${offset}`;
-            // using p-limit to run promise.allSettled with limited concurrency
-            requests.push(
-                requestLimit(() => fetch(newEndpoint, {
-                    method: "GET",
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',  
-                    }
-                }).then(response => response.json()))
-            );
-            offset += LIMIT;
+            if(trackData.items == undefined) {
+                console.log("Track Data with undefined items: ", trackData)
+            } else {
+                let trackItems = trackData.items.map(item => item.track);
+                tracks = tracks.concat(trackItems);
+                trackEndpoint = trackData.next;
+            }
         }
 
-        // returns an array of each fulfilled request
-        const trackResults = await Promise.allSettled(requests);
-        
-        // items is an array so map(items) creates a 2D array, flatten this to a 1D array
-        return trackResults.map(result => result.value.items).flat();
-    
-    } catch(err) {
-        throw new Error({error: 'Unable to retrieve liked songs list'});
+        return tracks;
+
+    } catch (err) {
+        console.error(err);
     }
 }
+
 /** FETCH LIKED SONGS **/
 /***********************/
 
@@ -175,7 +154,12 @@ const deleteLikedSongs = async (req, res) => {
 }
 
 const deleteAllLikedSongs = async (req, res) => {
+    try {
+        let token = req.body.user.token;
 
+    } catch (err) {
+        console.error(err);
+    }
 }
 /** DELETE LIKED SONGS **/
 /************************/
@@ -236,5 +220,6 @@ export {
     fetchTopTracks,
     addTracksToLikedSongs,
     deleteLikedSongs,
+    deleteAllLikedSongs,
     addTracksFromPlaylistsToLikedSongs,
 }
